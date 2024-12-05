@@ -1,17 +1,4 @@
 ## 基本思路
-用sonnet来对haiku的翻译效果做评估，训练一个基于2者比较的sft 翻译检查模型
-
-## 数据集
-局限在商品Title翻译场景，也可以复制到其他的场景
-https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023/tree/main/raw/meta_categories
-
-## 初步计划
-1. 先局限在“英翻中”
-2. 先跑出个别品类的训练数据
-3. 统计分析2个模型之间 一致的部分，不一致的部分，以及差异的部分，得到最终的训练集🏋️
-
-
-## 实施步骤
 
 ### 准备数据
 
@@ -26,7 +13,35 @@ https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023/tree/main/raw/me
 > s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference/part2/meta_*.jsonl
 
 #### 4.执行batch_inference, 得到批量运行的结果
-> s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/haiku3/
-> s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/35-v2/
+> batch_inference 默认的并发job数为20个
+
+> 输出S3路径 
+>	s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/haiku3/
+> 	s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/35-v2/
+
+```bash
+# claude 3.5 v2
+python run_batch_inference.py --input_s3_uri s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference/part2/meta_Amazon_Fashion_0.jsonl --output_s3_uri s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/c35/ --model_id anthropic.claude-3-5-sonnet-20241022-v2:0
+
+python run_batch_inference.py --input_s3_uri s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference/part2/meta_Amazon_Fashion_48000.jsonl --output_s3_uri s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/c35/ --model_id anthropic.claude-3-5-sonnet-20241022-v2:0
+
+python run_batch_inference.py --input_s3_uri s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference/part2/meta_Amazon_Fashion_96000.jsonl --output_s3_uri s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/c35/ --model_id anthropic.claude-3-5-sonnet-20241022-v2:0
+
+python run_batch_inference.py --input_s3_uri s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference/part2/meta_Appliances_0.jsonl --output_s3_uri s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/c35/ --model_id anthropic.claude-3-5-sonnet-20241022-v2:0
+
+python run_batch_inference.py --input_s3_uri s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference/part2/meta_Appliances_48000.jsonl --output_s3_uri s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/c35/ --model_id anthropic.claude-3-5-sonnet-20241022-v2:0
+
+# haiku3
+python run_batch_inference.py --input_s3_uri s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference/part2/meta_Amazon_Fashion_0.jsonl --output_s3_uri s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/haiku3/ --model_id anthropic.claude-3-haiku-20240307-v1:0
+
+python run_batch_inference.py --input_s3_uri s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference/part2/meta_Amazon_Fashion_48000.jsonl --output_s3_uri s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/haiku3/ --model_id anthropic.claude-3-haiku-20240307-v1:0
+
+python run_batch_inference.py --input_s3_uri s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference/part2/meta_Amazon_Fashion_96000.jsonl --output_s3_uri s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/haiku3/ --model_id anthropic.claude-3-haiku-20240307-v1:0
+
+python run_batch_inference.py --input_s3_uri s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference/part2/meta_Appliances_0.jsonl --output_s3_uri s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/haiku3/ --model_id anthropic.claude-3-haiku-20240307-v1:0
+
+python run_batch_inference.py --input_s3_uri s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference/part2/meta_Appliances_48000.jsonl --output_s3_uri s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/haiku3/ --model_id anthropic.claude-3-haiku-20240307-v1:0
+```
+
 
 
