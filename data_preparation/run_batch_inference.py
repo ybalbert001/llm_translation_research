@@ -34,7 +34,7 @@ def create_job(region, input_s3_uri, output_s3_uri, model_id):
     })
 
     response=bedrock_client.create_model_invocation_job(
-        roleArn="arn:aws:iam::687752207838:role/service-role/amazon-product-title-batch-translate-role",
+        roleArn="arn:aws:iam::687752207838:role/service-role/amazon-product-title-batch-translate-role", #,"arn:aws:iam::687752207838:role/service-role/amazon-product-title-batch-translate-east-role"
         modelId=model_id,
         jobName=f"my-batch-job-{region}-{time.time()}",
         inputDataConfig=inputDataConfig,
