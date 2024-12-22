@@ -1,7 +1,7 @@
 ### 准备数据
 
 #### 1.从Hugging Face上下载数据，并提取对应字段
-> 执行extract_hf_amazon_data.py，输出到本地目录 hf_amazon_product_title
+> 执行extract_hf_amazon_data.py，输出到S3目录 s3://{bucket}/amazon-review-product-meta-data/batch-inference
 
 #### 2.把原始title整理成batch inference的输入prompt jsonl文件
 > 执行batch_infer_data_process.py， 输出到本地目录 
