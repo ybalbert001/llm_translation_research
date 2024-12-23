@@ -82,7 +82,7 @@ python run_batch_inference.py \
         s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-input/claude/ru-ru/meta_Toys_and_Games_0.jsonl \
         s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-input/claude/ru-ru/meta_Unknown_0.jsonl \
         s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-input/claude/ru-ru/meta_Video_Games_0.jsonl \
-    --output_s3_uri s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/c35/ru-ru/ \
+    --output_s3_uri s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/haiku3/ru-ru/ \
     --model_id anthropic.claude-3-haiku-20240307-v1:0
 ```
 

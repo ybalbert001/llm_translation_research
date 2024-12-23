@@ -1,4 +1,9 @@
-### 对比LLM翻译效果
+### 将翻译结果映射到Glue Table
+
+```bash
+python setup_athena_tables.py --database translation_raw --athena_output s3://translation-quality-check-model-sft-20241203/athena-output/ --s3_bucket translation-quality-check-model-sft-20241203 --s3_prefix amazon-review-product-meta-data/batch-inference-output
+```
+通过上面命令，创建了两张推理结果表分别是  claude_inference_table 和 nova_inference_table
 
 #### 预处理LLM翻译的数据
 
