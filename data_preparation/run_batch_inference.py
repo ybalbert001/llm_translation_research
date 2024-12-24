@@ -94,8 +94,8 @@ if __name__ == '__main__':
     # Process each input URI
     for i, input_uri in enumerate(args.input_s3_uri_list):
         # Wait if we have too many active jobs
-        while get_active_jobs_count(jobs_status) >= 5:
-            print(f"Active jobs limit reached (5). Waiting for 1 minute...")
+        while get_active_jobs_count(jobs_status) >= 20:
+            print(f"Active jobs limit reached (20). Waiting for 1 minute...")
             time.sleep(60)
             
             # Update status of all jobs

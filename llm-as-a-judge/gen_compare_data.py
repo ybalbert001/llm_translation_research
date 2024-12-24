@@ -223,7 +223,7 @@ def main():
                       default='translation-quality-check-model-sft-20241203',
                       help='S3 bucket for final output')
     parser.add_argument('--s3_prefix', type=str,
-                  default='amazon-review-product-meta-data/batch-inference-output/translation_eval',
+                  default='amazon-review-product-meta-data/batch-inference-input/translation_eval',
                   help='S3 bucket for final output')
   
     args = parser.parse_args()
