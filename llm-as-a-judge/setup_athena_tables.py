@@ -46,19 +46,17 @@ CREATE EXTERNAL TABLE IF NOT EXISTS nova_inference_results (
         >>
     >,
     modelOutput STRUCT<
-        id: STRING,
-        type: STRING,
-        role: STRING,
-        model: STRING,
-        content: ARRAY<STRUCT<
-            type: STRING,
-            text: STRING
-        >>,
-        stop_reason: STRING,
-        stop_sequence: STRING,
-        usage: STRUCT<
-            input_tokens: INT,
-            output_tokens: INT
+        output: STRUCT<
+            message: STRUCT<
+                content: ARRAY<STRUCT<text: STRING>>,
+                role: STRING
+            >,
+            stop_reason: STRING,
+            usage: STRUCT<
+                input_tokens: INT,
+                output_tokens: INT,
+                total_tokens: INT
+            >
         >
     >,
     recordId STRING

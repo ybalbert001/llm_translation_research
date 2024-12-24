@@ -112,3 +112,8 @@ python run_batch_inference.py \
     --output_s3_uri s3://translation-quality-check-model-sft-20241203-east-1/amazon-review-product-meta-data/batch-inference-output/novaLite/ru-ru/ \
     --model_id amazon.nova-lite-v1:0
 ```
+
+> #### 运行完毕后，把输出拷贝会us-west-2
+```bash
+aws s3 cp s3://translation-quality-check-model-sft-20241203-east-1/amazon-review-product-meta-data/batch-inference-output/novaLite/ru-ru s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/novaLite/ru-ru --recursive --source-region us-east-1 --region us-west-2
+```
