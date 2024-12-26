@@ -200,37 +200,83 @@ def sleep_and_retry(func):
 
 
 class BedrockBatchInference:
-    def __init__(self, model_id: str, rpm: int):
+    # Class-level rate limiter to ensure it's shared across all instances and threads
+    _rate_limiter = None
+    _rate_limiter_lock = threading.Lock()
+    _call_count = 0
+    _last_call_time = time.time()
+
+    def __init__(self, model_id: str, rpm: int, region:str, ak:str, sk:str):
         """Initialize the batch inference processor"""
-        self.bedrock = boto3.client('bedrock-runtime')
+        self.bedrock = boto3.client('bedrock-runtime', aws_access_key_id=ak, aws_secret_access_key=sk, region_name=region)
         self.model_id = model_id
         self.rpm = rpm
+        
+        # Initialize or get the shared rate limiter
+        with self._rate_limiter_lock:
+            if BedrockBatchInference._rate_limiter is None:
+                BedrockBatchInference._rate_limiter = limits(calls=rpm, period=60)
+                print(f"Initialized rate limiter with {rpm} calls per minute")
+        
+        # Create rate-limited invoke function for this instance
+        self._rate_limited_invoke = sleep_and_retry(BedrockBatchInference._rate_limiter(self._invoke_model))
 
-    @sleep_and_retry
     def invoke_model_with_rate_limit(self, record: Dict) -> Dict:
-        """Process a single record through Bedrock's model with rate limiting using the converse API"""
-        # Create rate limiter for this instance
-        rate_limiter = limits(calls=self.rpm, period=60)
-        rate_limited_invoke = rate_limiter(lambda: self._invoke_model(record))
-        return rate_limited_invoke()
+        """Process a single record through Bedrock's model with rate limiting"""
+        with self._rate_limiter_lock:
+            current_time = time.time()
+            BedrockBatchInference._call_count += 1
+            
+            # If this is the first call in a new RPM cycle
+            if (BedrockBatchInference._call_count - 1) % self.rpm == 0:
+                elapsed = current_time - BedrockBatchInference._last_call_time
+                print(f"\nStarting new RPM cycle at call {BedrockBatchInference._call_count}")
+                print(f"Time since last cycle: {elapsed:.2f}s")
+                
+                # If we're starting a new cycle too soon, sleep until the full minute has passed
+                if elapsed < 60:
+                    sleep_time = 60 - elapsed
+                    print(f"Rate limit reached, sleeping for {sleep_time:.2f}s to start new cycle")
+                    time.sleep(sleep_time)
+                
+                # Update times after potential sleep
+                current_time = time.time()
+                BedrockBatchInference._last_call_time = current_time
+                elapsed = 0  # Reset elapsed time since this is the start of a new cycle
+            else:
+                # Calculate elapsed time since cycle start
+                elapsed = current_time - BedrockBatchInference._last_call_time
+            
+            # Log the call details
+            print(f"Call {BedrockBatchInference._call_count} - Time since cycle start: {elapsed:.2f}s")
+        
+        return self._rate_limited_invoke(record)
 
     def _invoke_model(self, record: Dict) -> Dict:
         """Internal method to invoke the Bedrock model with the given record"""
         try:
             # Extract the model input from the record
             model_input = record.get('modelInput', {})
-
-            payload = json.dumps(model_input)
-
             if not model_input:
                 raise ValueError("No model input found in the record.")
 
-            print(f"model_input: {model_input}")
-    
-            response = self.bedrock.invoke_model(body=payload, modelId=self.model_id)
+            # Log request details
+            print(f"Processing record {record.get('recordId', 'unknown')} at {time.strftime('%Y-%m-%d %H:%M:%S')}")
+            print(f"Current thread: {threading.current_thread().name}")
+            with self._rate_limiter.lock:
+                period_remaining = self._rate_limiter.period - (self._rate_limiter.clock() - self._rate_limiter.last_reset)
+                print(f"Rate limiter state - calls: {self._rate_limiter.num_calls}, period remaining: {period_remaining:.2f}s")
+            
+            # Prepare and send request
+            payload = json.dumps(model_input)
+            response = self.bedrock.invoke_model(
+                modelId=self.model_id,
+                body=payload
+            )
+            
+            # Parse and log response
             response_body = json.loads(response.get('body').read())
-   
-            print(f"response_body: {response_body}")
+            print(f"Successfully processed record {record.get('recordId', 'unknown')}")
             # Construct the output following the inference output schema
             return {
                 'modelInput': model_input,
@@ -268,15 +314,18 @@ def write_jsonl(data: List[Dict], s3_path: str):
 
 def main():
     """Main execution function"""
-    args = getResolvedOptions(sys.argv, ['input_path', 'output_path', 'model_id', 'rpm', 'max_worker'])
+    args = getResolvedOptions(sys.argv, ['input_path', 'output_path', 'model_id', 'rpm', 'max_worker', 'ak', 'sk', 'region'])
     input_path = args['input_path']
     output_path = args['output_path']
     model_id = args['model_id']
     rpm = int(args['rpm'])
     max_worker = int(args.get('max_worker', 10))
+    ak = args['ak']
+    sk = args['sk']
+    region = args['region']
     
     # Initialize processor
-    processor = BedrockBatchInference(model_id, rpm)
+    processor = BedrockBatchInference(model_id, rpm, region, ak, sk)
     
     try:
         # Read input data
