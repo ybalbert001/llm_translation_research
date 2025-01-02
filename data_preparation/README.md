@@ -109,11 +109,35 @@ python run_batch_inference.py \
         s3://translation-quality-check-model-sft-20241203-east-1/amazon-review-product-meta-data/batch-inference-input/nova/ru-ru/meta_Toys_and_Games_0.jsonl \
         s3://translation-quality-check-model-sft-20241203-east-1/amazon-review-product-meta-data/batch-inference-input/nova/ru-ru/meta_Unknown_0.jsonl \
         s3://translation-quality-check-model-sft-20241203-east-1/amazon-review-product-meta-data/batch-inference-input/nova/ru-ru/meta_Video_Games_0.jsonl \
-    --output_s3_uri s3://translation-quality-check-model-sft-20241203-east-1/amazon-review-product-meta-data/batch-inference-output/novaLite/ru-ru/ \
-    --model_id amazon.nova-lite-v1:0
+    --output_s3_uri s3://translation-quality-check-model-sft-20241203-east-1/amazon-review-product-meta-data/batch-inference-output/novaPro/ru-ru/ \
+    --model_id amazon.nova-micro-v1:0
 ```
 
 > #### 运行完毕后，把输出拷贝会us-west-2
 ```bash
 aws s3 cp s3://translation-quality-check-model-sft-20241203-east-1/amazon-review-product-meta-data/batch-inference-output/novaLite/ru-ru s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/novaLite/ru-ru --recursive --source-region us-east-1 --region us-west-2
+```
+
+
+### 如果bedrock batch_inference 由于资源问题获得结果，那么可以采用[intelligent-bedrock-batch-inference](https://github.com/ybalbert001/intelligent-bedrock-batch-inference)中的方案，以onDemand的方式运行批量推理
+
+> 参数解释
+> input_s3_uri_list 为以","分隔的s3路径列表
+> output_s3_uri 为s3路径目录
+> rpm 为运行的速率，需要根据账户的quota进行设置
+> ak/sk/region 可以供你选择其他的账户进行推理，如果不填写，默认使用本账户进行推理
+
+```bash
+aws glue start-job-run \
+    --job-name intelligent-bedrock-batch-inference \
+    --arguments '{
+        "--input_s3_uri_list": "s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-input/claude/zh-cn/meta_Appliances_0.jsonl",
+        "--output_s3_uri": "s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/c35-v2/zh-cn/",
+        "--model_id": "anthropic.claude-3-haiku-20240307-v1:0",
+        "--rpm": "50",
+        "--max_worker" : "10",
+        "--ak" : "{ak}",
+        "--sk" : "{sk}",
+        "--region" : "{region}"
+    }'
 ```
