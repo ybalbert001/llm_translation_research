@@ -1,10 +1,93 @@
 import json
 import pandas as pd
+import glob
 import os
 import boto3
 import argparse
 from urllib.parse import urlparse
 import io
+
+
+def row_to_nova_record(base_name, idx, row, target_lang):
+    system_list = [
+        {
+            "text": "你是一位翻译专家，擅长翻译商品title。"
+        }
+    ]
+
+    # Configure the inference parameters.
+    inf_params = {
+        "max_new_tokens": 2048, 
+        "top_p": 0.9, 
+        "top_k": 20, 
+        "temperature": 0.7, 
+        "stopSequences" : ["</translation>"]
+    }
+
+    record_id = f"{base_name}_{idx}"
+    title = row[0]
+    record = {
+        "recordId": f"{record_id}", 
+        "modelInput": {
+            "schemaVersion": "messages-v1",
+            "system" : system_list,
+            "inferenceConfig": inf_params,
+            "messages": [ 
+                { 
+                    "role": "user", 
+                    "content": [
+                        {
+                            "text": f"请精准的把<src>中的商品Title翻译为{target_lang}, 输出到<translation> xml tag中。\n<src>{title}</src>\n" 
+                        } 
+                    ]
+                },
+                { 
+                    "role": "assistant", 
+                    "content": [
+                        {
+                            "text": "<translation>" 
+                        } 
+                    ]
+                }
+            ]
+        }
+    }
+
+    return record
+
+def row_to_claude_record(base_name, idx, row, target_lang):
+    record_id = f"{base_name}_{idx}"
+    title = row[0]
+    record = {
+        "recordId": f"{record_id}", 
+        "modelInput": {
+            "anthropic_version": "bedrock-2023-05-31", 
+            "max_tokens": 2048,
+            "system" : "你是一位翻译专家，擅长翻译商品title。",
+            "stop_sequences": ['</translation>'],
+            "messages": [ 
+                { 
+                    "role": "user", 
+                    "content": [
+                        {
+                            "type": "text", 
+                            "text": f"请精准的把<src>中的商品Title翻译为{target_lang}, 输出到<translation> xml tag中。\n<src>{title}</src>\n" 
+                        } 
+                    ]
+                },
+                { 
+                    "role": "assistant", 
+                    "content": [
+                        {
+                            "type": "text", 
+                            "text": "<translation>" 
+                        } 
+                    ]
+                }
+            ]
+        }
+    }
+    return record
 
 def parse_s3_path(s3_path):
     """Parse S3 path into bucket and key."""
@@ -70,7 +153,7 @@ def list_s3_files(s3_path_pattern):
         print(f"Error listing S3 files: {str(e)}")
         raise
 
-def process_csv_file(input_s3_path, output_s3_path, target_lang):
+def process_csv_file(input_s3_path, output_s3_path, target_lang, model_name):
     """Process a single CSV file from S3 and write results to S3."""
     print(f"Processing {input_s3_path}")
     
@@ -83,36 +166,11 @@ def process_csv_file(input_s3_path, output_s3_path, target_lang):
     # Process records
     records = []
     for idx, row in df.iterrows():
-        record_id = f"{base_name}_{idx}"
-        title = row[0]
-        record = {
-            "recordId": f"{record_id}", 
-            "modelInput": {
-                "anthropic_version": "bedrock-2023-05-31", 
-                "max_tokens": 2048,
-                "stop_sequences": ['</translation>'],
-                "messages": [ 
-                    { 
-                        "role": "user", 
-                        "content": [
-                            {
-                                "type": "text", 
-                                "text": f"你是一位翻译专家，擅长翻译商品title。请精准的把<src>中的商品Title翻译为{target_lang}, 输出到<translation> xml tag中。\n<src>{title}</src>\n" 
-                            } 
-                        ]
-                    },
-                    { 
-                        "role": "assistant", 
-                        "content": [
-                            {
-                                "type": "text", 
-                                "text": "<translation>" 
-                            } 
-                        ]
-                    }
-                ]
-            }
-        }
+        if model_name == 'claude':
+            record = row_to_claude_record(base_name, idx, row, target_lang) 
+        elif model_name == 'nova':
+            record = row_to_nova_record(base_name, idx, row, target_lang) 
+
         records.append(record)
     
     # Write to S3
@@ -123,6 +181,8 @@ def main():
     parser = argparse.ArgumentParser(description='Process CSV files for translation')
     parser.add_argument('--target-lang', type=str, default='zh-cn',
                       help='Target language for translation (default: zh-cn)')
+    parser.add_argument('--model_name', type=str, default='claude',
+                      help='Target model : claude')
     args = parser.parse_args()
 
     try:
@@ -131,7 +191,7 @@ def main():
             "s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference/meta_*.csv"
         ]
 
-        output_prefix = f"s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-input/claude/{args.target_lang}/"
+        output_prefix = f"s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-input/{args.model_name}/{args.target_lang}/"
 
         print(f"Target language: {args.target_lang}")
         for pattern in input_patterns:
@@ -148,7 +208,7 @@ def main():
                     output_path = f"{output_prefix}{base_name}.jsonl"
                     
                     # Process the file
-                    process_csv_file(input_file, output_path, args.target_lang)
+                    process_csv_file(input_file, output_path, args.target_lang, args.model_name)
                 except Exception as e:
                     print(f"Error processing file {input_file}: {str(e)}")
     except Exception as e:
