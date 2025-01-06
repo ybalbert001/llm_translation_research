@@ -18,7 +18,7 @@ FIELDS TERMINATED BY '\t'
 LOCATION 's3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/translation_combine/';
 """
 
-add_compare_partition_sql = """
+add_compare_partition_sql_template = """
 INSERT INTO combine_translation
 WITH nova_results AS (
   SELECT
@@ -30,7 +30,7 @@ WITH nova_results AS (
   FROM
     nova_inference_results
   WHERE
-    recordid <> '' AND model = 'novaLite' 
+    recordid <> '' AND model in ('{model_a}','{model_b}') 
 ),
 claude_results AS (
   SELECT
@@ -42,16 +42,16 @@ claude_results AS (
   FROM
     claude_inference_results
   WHERE
-    recordid <> '' AND model = 'haiku3' 
+    recordid <> '' AND model in ('{model_a}', '{model_b}') 
 )
 SELECT
   recordid,
   src,
-  MAX(CASE WHEN model = 'haiku3' THEN translation ELSE NULL END) AS translation_a,
-  MAX(CASE WHEN model = 'novaLite' THEN translation ELSE NULL END) AS translation_b,
+  MAX(CASE WHEN model = '{model_a}' THEN translation ELSE NULL END) AS translation_a,
+  MAX(CASE WHEN model = '{model_b}' THEN translation ELSE NULL END) AS translation_b,
   language,
-  'haiku3' as model_a,
-  'novaLite' as model_b
+  '{model_a}' as model_a,
+  '{model_b}' as model_b
 FROM
 (
 SELECT * FROM nova_results
@@ -64,8 +64,8 @@ src,
 language
 """
 
-query_translation_compare_data_sql = """
-select recordid, src, translation_a, translation_b, language, model_a, model_b from combine_translation where recordid <> ''
+query_translation_compare_data_sql_template = """
+select recordid, src, translation_a, translation_b, language, model_a, model_b from combine_translation where recordid <> '' and model_a='{model_a}' and model_b='{model_b}'
 """
 
 def execute_query(client, query, database, s3_output):
@@ -93,7 +93,7 @@ def execute_query(client, query, database, s3_output):
                 return execution_id
                 
     except ClientError as e:
-        raise Exception(f"AWS API error: {str(e)}")
+        raise Exception(f"AWS API error: {str(e)}, SQL:{query}")
 
 def iterate_query_results(client, execution_id):
     """Get results of completed Athena query"""
@@ -136,17 +136,19 @@ def build_eval_batch_inference_json(record_id, src, translation_a, translation_b
 
     prefill="```json"
     user_prompt_part1 = f"""## Source Text
-<text>
-{src}
-</text>
+<source>
+<content>{src}</content>
+</source>
 
-## Translations (target_lang: {language})
-<translations>
+## Translations
+<translations target_lang="{language}">
 <translation id="1">
-{translation_a}
+<translator>machine</translator>
+<content>{translation_a}</content>
 </translation>
 <translation id="2">
-{translation_b}
+<translator>expert</translator>
+<content>{translation_b}</content>
 </translation>
 </translations>
 """
@@ -158,6 +160,11 @@ def build_eval_batch_inference_json(record_id, src, translation_a, translation_b
 { "id": 2, "thought" : "....", scores : [5.0, ...]},
 ]
 ```
+
+## Notice
+1. Please be sure to provide independent evaluations for both translations. 
+2. When assessing machine's translation, you may refer to the expert's translation, but do not compare these two in your thought process. 
+3. Simply provide objective factual criteria for evaluation in "thought" field.
 
 Please rate each translation in these 7 aspects (0 - 5.0), the "scores" should be a list with a length of 7. """
     user_prompt = user_prompt_part1 + user_prompt_part2
@@ -195,6 +202,9 @@ Please rate each translation in these 7 aspects (0 - 5.0), the "scores" should b
 
 def write_results_to_s3(s3_client, results, bucket, key):
     jsonl_content = '\n'.join(results)
+
+    import pdb
+    pdb.set_trace()
     # Upload to S3
     try:
         s3_client.put_object(
@@ -225,6 +235,12 @@ def main():
     parser.add_argument('--s3_prefix', type=str,
                   default='amazon-review-product-meta-data/batch-inference-input/translation_eval',
                   help='S3 bucket for final output')
+    parser.add_argument('--model_a', type=str,
+                  default='novaLite',
+                  help='the lower level translation model')
+    parser.add_argument('--model_b', type=str,
+                  default='c35-v2',
+                  help='the higher level translation model')
   
     args = parser.parse_args()
 
@@ -234,6 +250,8 @@ def main():
     s3_bucket = args.s3_bucket 
     s3_path = f'amazon-review-product-meta-data/batch-inference-output/translation_combine/{date_str}'  
     s3_eval_path = args.s3_prefix
+    model_a = args.model_a
+    model_b = args.model_b
     
     # Initialize AWS clients
     athena_client = boto3.client('athena', region_name=region)
@@ -242,9 +260,13 @@ def main():
     try:
         # Execute query
         print("Executing Athena query...")
-        # execute_query(athena_client, create_table_sql, database, athena_output)
-        # execute_query(athena_client, add_compare_partition_sql, database, athena_output)
-        execution_id = execute_query(athena_client, query_translation_compare_data_sql, database, athena_output)
+        execute_query(athena_client, create_table_sql, database, athena_output)
+
+        add_compare_partition_sql_instance = add_compare_partition_sql_template.format(model_a=model_a, model_b=model_b)
+        execute_query(athena_client, add_compare_partition_sql_instance, database, athena_output)
+
+        query_translation_compare_data_sql_instance = query_translation_compare_data_sql_template.format(model_a=model_a, model_b=model_b)
+        execution_id = execute_query(athena_client, query_translation_compare_data_sql_instance, database, athena_output)
 
         # Get results
         print("Getting query results...")
@@ -261,6 +283,12 @@ def main():
                 idx += 1
                 print(f"Finsh writing jsonl file of {filename}")
         
+        # 最后一轮可能没有48000条
+        filename = f"{model_a}-{model_b}-{idx}.jsonl"
+        write_results_to_s3(s3_client, json_list, s3_bucket, s3_eval_path+'/'+filename)
+        json_list.clear()
+        idx += 1
+        print(f"Finsh writing jsonl file of {filename}")
         print(f"Results written to s3://{s3_bucket}/{s3_path}")
         
     except Exception as e:

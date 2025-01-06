@@ -121,13 +121,13 @@ TBLPROPERTIES ('has_encrypted_data'='false');
 # Add partitions query template
 add_partition_claude_template = """
 ALTER TABLE claude_inference_results ADD IF NOT EXISTS
-PARTITION (model = 'haiku3', language = '{language}', job_id = '{job_id}', execution_id = '{execution_id}')
-LOCATION 's3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/haiku3/{language}/{job_id}/{execution_id}/';
+PARTITION (model = '{model}', language = '{language}', job_id = '{job_id}', execution_id = '{execution_id}')
+LOCATION 's3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/{model}/{language}/{job_id}/{execution_id}/';
 """
 add_partition_nova_template = """
 ALTER TABLE nova_inference_results ADD IF NOT EXISTS
-PARTITION (model = 'novaLite', language = '{language}', job_id = '{job_id}', execution_id = '{execution_id}')
-LOCATION 's3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/novaLite/{language}/{job_id}/{execution_id}/';
+PARTITION (model = '{model}', language = '{language}', job_id = '{job_id}', execution_id = '{execution_id}')
+LOCATION 's3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/{model}/{language}/{job_id}/{execution_id}/';
 """
 
 def execute_query(client, query, database, s3_output, timeout=300):
@@ -228,7 +228,7 @@ def list_partitions(s3_client, bucket, prefix, progress_interval=100):
 def add_partition(client, database, s3_output, model, language, job_id, execution_id):
     """Add a partition to the batch inference results table"""
 
-    if model == 'haiku3':
+    if model in ['haiku3', 'c35-v2', 'c35', 'haiku35']:
         query = add_partition_claude_template.format(
             model=model,
             language=language,
@@ -236,7 +236,7 @@ def add_partition(client, database, s3_output, model, language, job_id, executio
             execution_id=execution_id
         )
         execute_query(client, query, database, s3_output)
-    elif model == 'novaLite':
+    elif model in ['novaLite', 'novaPro', 'novaMicro']:
         query = add_partition_nova_template.format(
             model=model,
             language=language,
