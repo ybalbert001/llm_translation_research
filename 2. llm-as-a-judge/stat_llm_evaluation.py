@@ -1,7 +1,10 @@
 import json
 import numpy as np
 import argparse
+import boto3
+from botocore.config import Config
 from collections import defaultdict
+import xml.etree.ElementTree as ET
 
 def extract_source_and_translations(json_str):
     """Extract source text and translations from the input."""
@@ -18,24 +21,25 @@ def extract_source_and_translations(json_str):
                 text = item["text"]
                 if "Source Text" in text:
                     # Extract source text between <text> tags
-                    start = text.find("<text>") + len("<text>")
-                    end = text.find("</text>")
+                    start = text.find("<source>\n<content>") + len("<source>\n<content>")
+                    end = text.find("</content>\n</source>")
                     source_text = text[start:end].strip()
                 
-                if "<translations>" in text:
+                if "<translations" in text:
                     # Extract translations
-                    trans_start = text.find("<translations>") + len("<translations>")
-                    trans_end = text.find("</translations>")
-                    trans_text = text[trans_start:trans_end]
+                    trans_start = text.find("<translations")
+                    trans_end = text.find("</translations>") + len("</translations>")
+                    xml_string = text[trans_start:trans_end]
                     
-                    # Parse individual translations
-                    for trans in trans_text.split("<translation"):
-                        if 'id="' in trans:
-                            trans_id = trans[trans.find('id="')+4:trans.find('"', trans.find('id="')+4)]
-                            content_start = trans.find(">") + 1
-                            content_end = trans.find("</translation>")
-                            if content_end != -1:
-                                translations[trans_id] = trans[content_start:content_end].strip()
+                    # 解析 XML 字符串
+                    root = ET.fromstring(xml_string)
+
+                    # 提取所有 content 元素的文本
+                    contents = [elem.text for elem in root.findall('.//content')]
+
+                    # 打印提取的内容
+                    for idx, content in enumerate(contents):
+                        translations[idx] = content
         
         return source_text, translations
     except Exception as e:
@@ -82,34 +86,51 @@ def process_file(file_path):
     success_count = 0
     total_lines = 0
     
-    with open(file_path, 'r') as f:
-        for line_num, line in enumerate(f, 1):
-            total_lines += 1
-            try:
-                # Parse the line
-                source_text, translations = extract_source_and_translations(line.strip())
-                translation_data = parse_line_scores(line.strip())
+    # Parse S3 path
+    if file_path.startswith('s3://'):
+        bucket = file_path.split('/')[2]
+        key = '/'.join(file_path.split('/')[3:])
+
+        config = Config(
+            retries = {'max_attempts': 10},
+            connect_timeout=5,
+            read_timeout=360  # 设置更长的读取超时时间，例如 360 秒
+        )
+
+        s3 = boto3.client('s3', config=config)
+        obj = s3.get_object(Bucket=bucket, Key=key)
+        lines = obj['Body'].read().decode('utf-8').splitlines()
+    else:
+        with open(file_path, 'r') as f:
+            lines = f.readlines()
+            
+    for line_num, line in enumerate(lines, 1):
+        total_lines += 1
+        try:
+            # Parse the line
+            source_text, translations = extract_source_and_translations(line.strip())
+            translation_data = parse_line_scores(line.strip())
+            
+            if translation_data:
+                # Collect scores for statistics
+                for trans_id, data in translation_data.items():
+                    all_scores[trans_id].append(data["scores"])
                 
-                if translation_data:
-                    # Collect scores for statistics
-                    for trans_id, data in translation_data.items():
-                        all_scores[trans_id].append(data["scores"])
-                    
-                    # Create simplified entry
-                    entry = {
-                        "source": source_text,
-                        "translations": translations,
-                        "evaluations": translation_data
-                    }
-                    all_data.append(entry)
-                    success_count += 1
-                else:
-                    error_count += 1
-                    
-            except Exception as e:
+                # Create simplified entry
+                entry = {
+                    "source": source_text,
+                    "translations": translations,
+                    "evaluations": translation_data
+                }
+                all_data.append(entry)
+                success_count += 1
+            else:
                 error_count += 1
-                print(f"Error processing line {line_num}: {str(e)}")
-                continue
+                
+        except Exception as e:
+            error_count += 1
+            print(f"Error processing line {line_num}: {str(e)}")
+            continue
     
     print(f"\nProcessing Summary:")
     print(f"Total lines processed: {total_lines}")
@@ -246,33 +267,62 @@ def print_aggregate_statistics(stats):
 def main():
     parser = argparse.ArgumentParser(description='Process LLM evaluation results and generate statistics.')
     parser.add_argument('--input', '-i', required=True,
-                      help='Input JSONL file path containing LLM evaluation results')
+                      help='Input JSONL file path (local or s3://) containing LLM evaluation results')
+    parser.add_argument('--output-dir', '-o', default='.',
+                      help='Output directory for statistics files (local or s3://)')
 
     args = parser.parse_args()
     
     print(f"Processing file: {args.input}")
+    input_file = args.input
 
     import os
-    filename = os.path.basename(args.input)
+    filename = os.path.basename(input_file)
 
     filename_detail = filename+ "_detail.json"
     filename_stat = filename+ "_stat.json"
     
     # Process all lines in the file
-    all_data, all_scores = process_file(args.input)
+    all_data, all_scores = process_file(input_file)
     
     # Calculate aggregate statistics
     statistics = calculate_aggregate_statistics(all_scores)
  
     # Save simplified JSON output
-    with open(filename_detail, 'w', encoding='utf-8') as f:
-        json.dump(all_data, f, ensure_ascii=False, indent=2)
-    
-    with open(filename_stat, 'w', encoding='utf-8') as f:
-        json.dump(statistics, f, ensure_ascii=False, indent=2)
-    
-    # Print statistics
-    print(f"\nSummary data has been saved to {args.output}")
+    output_dir = args.output_dir
+    if output_dir.startswith('s3://'):
+        s3 = boto3.client('s3')
+        bucket = output_dir.split('/')[2]
+        prefix = '/'.join(output_dir.split('/')[3:])
+        
+        # Write detail file to S3
+        detail_key = f"{prefix}/{filename_detail}"
+        s3.put_object(
+            Bucket=bucket,
+            Key=detail_key,
+            Body=json.dumps(all_data, ensure_ascii=False, indent=2).encode('utf-8')
+        )
+        
+        # Write stat file to S3
+        stat_key = f"{prefix}/{filename_stat}"
+        s3.put_object(
+            Bucket=bucket,
+            Key=stat_key,
+            Body=json.dumps(statistics, ensure_ascii=False, indent=2).encode('utf-8')
+        )
+        
+        print(f"\nSummary data has been saved to s3://{bucket}/{prefix}/{filename_detail} and s3://{bucket}/{prefix}/{filename_stat}")
+    else:
+        detail_path = os.path.join(output_dir, filename_detail)
+        stat_path = os.path.join(output_dir, filename_stat)
+        
+        with open(detail_path, 'w', encoding='utf-8') as f:
+            json.dump(all_data, f, ensure_ascii=False, indent=2)
+        
+        with open(stat_path, 'w', encoding='utf-8') as f:
+            json.dump(statistics, f, ensure_ascii=False, indent=2)
+        
+        print(f"\nSummary data has been saved to {detail_path} and {stat_path}")
 
 if __name__ == "__main__":
     main()

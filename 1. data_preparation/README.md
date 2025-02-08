@@ -142,10 +142,16 @@ python run_batch_inference.py \
 
 ### 运行完毕后，把输出拷贝回us-west-2
 ```bash
-aws s3 cp s3://translation-quality-check-model-sft-20241203-east-1/amazon-review-product-meta-data/batch-inference-output/novaMicro/zh-cn s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/novaMicro/zh-cn --recursive --source-region us-east-1 --region us-west-2
+aws s3 sync s3://translation-quality-check-model-sft-20241203-east-1/amazon-review-product-meta-data/batch-inference-output/novaMicro/zh-cn s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/novaMicro/zh-cn  --source-region us-east-1 --region us-west-2
+
+aws s3 sync s3://translation-quality-check-model-sft-20241203-east-1/amazon-review-product-meta-data/batch-inference-output/novaLite/zh-cn s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/novaLite/zh-cn --source-region us-east-1 --region us-west-2
+
+aws s3 sync s3://translation-quality-check-model-sft-20241203-east-1/amazon-review-product-meta-data/batch-inference-output/novaPro/zh-cn s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/novaPro/zh-cn --source-region us-east-1 --region us-west-2
 ```
 
-## 如果bedrock batch_inference 由于资源问题获得结果，那么可以采用[intelligent-bedrock-batch-inference](https://github.com/ybalbert001/intelligent-bedrock-batch-inference)中的方案，以onDemand的方式运行批量推理
+## 采用Glue Job批量推理
+
+> 如果bedrock batch_inference 由于资源问题难以获得结果，那么可以采用[intelligent-bedrock-batch-inference](https://github.com/ybalbert001/intelligent-bedrock-batch-inference)以onDemand的方式运行批量推理
 
 ### 参数解释
 - input_s3_uri_list: 为以","分隔的s3路径列表
@@ -165,5 +171,21 @@ aws glue start-job-run \
         "--ak" : "{ak}",
         "--sk" : "{sk}",
         "--region" : "{region}"
+    }'
+```
+
+执行最强模型的翻译
+```bash
+aws glue start-job-run \
+    --job-name intelligent-bedrock-batch-inference \
+    --arguments '{
+        "--input_s3_uri_list": "s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-input/claude/zh-cn/meta_Appliances_0.jsonl,s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-input/claude/zh-cn/meta_Arts_Crafts_and_Sewing_0.jsonl,s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-input/claude/zh-cn/meta_Books_0.jsonl,s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-input/claude/zh-cn/meta_Electronics_0.jsonl,s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-input/claude/zh-cn/meta_Industrial_and_Scientific_0.jsonl,s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-input/claude/zh-cn/meta_Kindle_Store_0.jsonl,s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-input/claude/zh-cn/meta_Software_0.jsonl,s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-input/claude/zh-cn/meta_Toys_and_Games_0.jsonl,s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-input/claude/zh-cn/meta_Unknown_0.jsonl,s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-input/claude/zh-cn/meta_Video_Games_0.jsonl",
+        "--output_s3_uri": "s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/c35-v2/zh-cn/",
+        "--model_id": "anthropic.claude-3-5-sonnet-20241022-v2:0",
+        "--rpm": "200",
+        "--max_worker" : "15",
+        "--ak" : "{}",
+        "--sk" : "{}",
+        "--region" : "us-west-2"
     }'
 ```

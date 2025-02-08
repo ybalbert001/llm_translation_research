@@ -19,6 +19,8 @@ LOCATION 's3://translation-quality-check-model-sft-20241203/amazon-review-produc
 """
 
 add_compare_partition_sql_template = """
+ALTER TABLE combine_translation DROP PARTITION IF EXISTS (model_a='{model_a}', model_b='{model_b}');
+
 INSERT INTO combine_translation
 WITH nova_results AS (
   SELECT
@@ -65,7 +67,7 @@ language
 """
 
 query_translation_compare_data_sql_template = """
-select recordid, src, translation_a, translation_b, language, model_a, model_b from combine_translation where recordid <> '' and model_a='{model_a}' and model_b='{model_b}'
+select recordid, src, translation_a, translation_b, language, model_a, model_b from combine_translation where recordid <> '' and language='{language}' and model_a='{model_a}' and model_b='{model_b}'
 """
 
 def execute_query(client, query, database, s3_output):
@@ -162,9 +164,9 @@ def build_eval_batch_inference_json(record_id, src, translation_a, translation_b
 ```
 
 ## Notice
-1. Please be sure to provide independent evaluations for both translations. 
-2. When assessing machine's translation, you may refer to the expert's translation, but do not compare these two in your thought process. 
-3. Simply provide objective factual criteria for evaluation in "thought" field.
+1. Please be sure to provide independent evaluations for both translations. Don't mention 'machine' or 'expert' in thought field.
+2. When assessing machine's translation, you may refer to the expert's translation, but do not compare these two in the thought field. 
+3. Only provide factual observations for imperfect parts in the translation, without giving summarizing conclusions.
 
 Please rate each translation in these 7 aspects (0 - 5.0), the "scores" should be a list with a length of 7. """
     user_prompt = user_prompt_part1 + user_prompt_part2
@@ -203,8 +205,6 @@ Please rate each translation in these 7 aspects (0 - 5.0), the "scores" should b
 def write_results_to_s3(s3_client, results, bucket, key):
     jsonl_content = '\n'.join(results)
 
-    import pdb
-    pdb.set_trace()
     # Upload to S3
     try:
         s3_client.put_object(
@@ -229,10 +229,10 @@ def main():
     parser.add_argument('--athena_output', type=str, 
                       default='s3://translation-quality-check-model-sft-20241203/athena-output/',
                       help='S3 output location for Athena query results')
-    parser.add_argument('--s3_bucket', type=str,
+    parser.add_argument('--output_s3_bucket', type=str,
                       default='translation-quality-check-model-sft-20241203',
                       help='S3 bucket for final output')
-    parser.add_argument('--s3_prefix', type=str,
+    parser.add_argument('--output_s3_prefix', type=str,
                   default='amazon-review-product-meta-data/batch-inference-input/translation_eval',
                   help='S3 bucket for final output')
     parser.add_argument('--model_a', type=str,
@@ -241,17 +241,20 @@ def main():
     parser.add_argument('--model_b', type=str,
                   default='c35-v2',
                   help='the higher level translation model')
+    parser.add_argument('--language', type=str,
+                  default='zh-cn',
+                  help='the target language of translation')
   
     args = parser.parse_args()
 
     region = args.region
     database = args.database
     athena_output = args.athena_output
-    s3_bucket = args.s3_bucket 
-    s3_path = f'amazon-review-product-meta-data/batch-inference-output/translation_combine/{date_str}'  
-    s3_eval_path = args.s3_prefix
+    s3_bucket = args.output_s3_bucket  
+    s3_eval_path = args.output_s3_prefix
     model_a = args.model_a
     model_b = args.model_b
+    lang = args.language
     
     # Initialize AWS clients
     athena_client = boto3.client('athena', region_name=region)
@@ -265,31 +268,35 @@ def main():
         add_compare_partition_sql_instance = add_compare_partition_sql_template.format(model_a=model_a, model_b=model_b)
         execute_query(athena_client, add_compare_partition_sql_instance, database, athena_output)
 
-        query_translation_compare_data_sql_instance = query_translation_compare_data_sql_template.format(model_a=model_a, model_b=model_b)
+        query_translation_compare_data_sql_instance = query_translation_compare_data_sql_template.format(language=lang, model_a=model_a, model_b=model_b)
         execution_id = execute_query(athena_client, query_translation_compare_data_sql_instance, database, athena_output)
 
         # Get results
         print("Getting query results...")
         json_list = []
         idx = 0
+        filename = f"{model_a}-{model_b}-{idx}.jsonl"
+        s3_key = s3_eval_path + '/' + lang + '/' + filename
+
         for record_id, src, translation_a, translation_b, language, model_a, model_b in iterate_query_results(athena_client, execution_id):
             record = build_eval_batch_inference_json(record_id, src, translation_a, translation_b, language)
             json_list.append(record)
             
             if len(json_list) == 48000:
                 filename = f"{model_a}-{model_b}-{idx}.jsonl"
-                write_results_to_s3(s3_client, json_list, s3_bucket, s3_eval_path+'/'+filename)
+                s3_key = s3_eval_path + '/' + lang + '/' + filename
+                write_results_to_s3(s3_client, json_list, s3_bucket, s3_key)
                 json_list.clear()
                 idx += 1
-                print(f"Finsh writing jsonl file of {filename}")
+                print(f"Finsh writing jsonl file to s3://{s3_bucket}/{s3_key}")
         
         # 最后一轮可能没有48000条
+        idx += 1                
         filename = f"{model_a}-{model_b}-{idx}.jsonl"
-        write_results_to_s3(s3_client, json_list, s3_bucket, s3_eval_path+'/'+filename)
+        s3_key = s3_eval_path + '/' + lang + '/' + filename
+        write_results_to_s3(s3_client, json_list, s3_bucket, s3_key)
         json_list.clear()
-        idx += 1
-        print(f"Finsh writing jsonl file of {filename}")
-        print(f"Results written to s3://{s3_bucket}/{s3_path}")
+        print(f"Finsh writing jsonl file to s3://{s3_bucket}/{s3_key}")
         
     except Exception as e:
         print(f"Error: {str(e)}")
