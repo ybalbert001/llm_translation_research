@@ -4,9 +4,11 @@
 目前数据集局限在商品Title翻译场景，也可以扩展到其他的场景 
 
 1. 原始数据集：
+
 ```https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023/tree/main/raw/meta_categories```
 
 2. 原文数据(for Batch Inference - jsonl)
+
 ```s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-input/{model_name}/```
 
 3. 译文数据(Batch Inference result - jsonl)
