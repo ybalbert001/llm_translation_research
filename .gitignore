@@ -1,1 +1,6 @@
 .DS_Store
+temp_script/
+*/temp/
+*/__pycache__
+*/*/*.json
+*/*/*.jsonl.out

@@ -1,0 +1,400 @@
+app:
+  description: ''
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  mode: workflow
+  name: Game_Term_Extractor
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: package
+  value:
+    plugin_unique_identifier: langgenius/bedrock:0.0.10@e23fcddb79a93f15f73bceaf9e00f1b3558f0e5b188e2f7e543946502083be78
+kind: app
+version: 0.1.5
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        sourceType: start
+        targetType: llm
+      id: 1743125122717-source-1743125135494-target
+      source: '1743125122717'
+      sourceHandle: source
+      target: '1743125135494'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: llm
+        targetType: llm
+      id: 1743125135494-source-1743125225178-target
+      source: '1743125135494'
+      sourceHandle: source
+      target: '1743125225178'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: llm
+        targetType: code
+      id: 1743125225178-source-1743125333411-target
+      source: '1743125225178'
+      sourceHandle: source
+      target: '1743125333411'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: code
+        targetType: end
+      id: 1743125333411-source-1743125432094-target
+      source: '1743125333411'
+      sourceHandle: source
+      target: '1743125432094'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: Start
+        type: start
+        variables:
+        - label: translation_pairs
+          max_length: 48000
+          options: []
+          required: true
+          type: paragraph
+          variable: translation_pairs
+      height: 90
+      id: '1743125122717'
+      position:
+        x: 80
+        y: 282
+      positionAbsolute:
+        x: 80
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: ''
+        model:
+          completion_params:
+            response_format: JSON
+            stop:
+            - '```'
+            temperature: 0.7
+          mode: chat
+          name: us.anthropic.claude-3-7-sonnet-20250219-v1:0
+          provider: langgenius/bedrock/bedrock
+        prompt_template:
+        - id: f13bf28f-d4dc-4554-8a6d-dc69e22b8f3b
+          role: system
+          text: "你是一位专业的术语提取专家，精通多种语言。你的任务是从多语言文本中识别和提取术语及其在各语言中的对应翻译。\n\n重点关注：\n\
+            1. 游戏专有名词（如: 物品名、技能名、系统名等）\n2. 角色名称\n3. 地点名称\n4. 重要概念或专有术语\n\n提取原则：\n\
+            1. 只提取有多语言对应关系的术语\n2. 确保提取的术语在不同语言间是对应的\n3. 忽略普通词汇，只关注专有名词和术语\n4. 分析术语在不同语言间的一致性\n\
+            5. 只输出json格式的结果，不要包含任何其他说明文字或注释\n6. 确保输出的json格式完全正确，不包含任何无效字符\n\n你必须以有效的json格式提供你的分析，结构如下：\n\
+            {\n  \"domains_identified\": [\n    \"游戏角色\",\n    \"游戏技能\",\n    ...\n\
+            \  ],\n  \"extracted_terms\": [\n    {\n      \"terms\": { \n        \"\
+            zh-cn\"\" \"中文术语\"\n        \"en-us\": \"英语术语\",\n        \"ja-jp\": \"\
+            日语术语\",\n        \"ko-kr\": \"韩语术语\",\n        ...,\n      },\n      \"\
+            consistency\": \"高/中/低\",\n      \"domain\": \"该术语可能属于的领域\",\n      \"\
+            confidence\": \"高/中/低\"\n    },\n    ...\n  ]\n}\n\n请勿在json标签前后包含任何文本。你的整个回答必须是一个有效的、可解析的json文档。"
+        - id: e0f39daa-e6c0-4dd7-b06e-95d6008a70d2
+          role: user
+          text: '请分析以下多语言翻译对并提取专业术语：
+
+            {{#1743125122717.translation_pairs#}}
+
+            提取这些翻译中的所有领域特定术语，重点识别应当在所有语言中保持一致翻译的专业词汇。分析术语在不同语言间的翻译一致性。你的回答必须只是一个有效的json文档，不含任何额外文本。'
+        selected: false
+        title: Extract
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 90
+      id: '1743125135494'
+      position:
+        x: 384
+        y: 282
+      positionAbsolute:
+        x: 384
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: ''
+        model:
+          completion_params:
+            reasoning_type: true
+            temperature: 0.7
+          mode: chat
+          name: us.anthropic.claude-3-7-sonnet-20250219-v1:0
+          provider: langgenius/bedrock/bedrock
+        prompt_template:
+        - id: 76293424-eb21-4b53-bd3c-6b9e1dc1adac
+          role: system
+          text: "你是一位专业的多语言术语管理专家和翻译专家。你的任务是严格评估提取的多语言术语映射的质量，并确保只有真正的专业术语才会被收录到术语库中。\n\
+            \n对于每个术语映射，请严格评估以下方面：\n\n1. 专业度（1-5分）：\n   - 1分：完全是常用词或通用表达，不应收录为专词\n\
+            \   - 3分：边界情况，有一定专业性但不强\n   - 5分：绝对是领域内的专业术语，必须收录\n\n2. 各语言准确性（1-5分）：\n\
+            \   - 为每种目标语言的翻译评分\n   - 1分：翻译错误或不准确\n   - 3分：翻译基本准确但有优化空间\n   - 5分：翻译完全准确且符合行业标准\n\
+            \n3. 跨语言一致性（1-5分）：\n   - 1分：不同语言间的翻译概念不一致\n   - 3分：基本一致但有细微差异\n   - 5分：所有语言间的翻译概念完全一致\n\
+            \n4. 总体评分（1-5分）：\n   - 综合考虑专业度、准确性和一致性\n\n特别注意：\n- 仅当词语在特定领域有特殊含义时才应被视为专业术语\n\
+            - 游戏中常见的功能名称、UI元素如有特定意义才算专业术语\n- 识别被错误拆分的术语（如\"DEF\"和\"Up\"应合并为\"DEF Up\"\
+            ）\n- 术语可能被错误地分割成多个单独条目，应检查它们是否应作为一个完整术语处理\n- 通用词汇或常用表达不应被认定为专业术语\n- 术语必须具有跨文档一致翻译的需求才有收录价值\n\
+            - 分析不同语言间的翻译策略和文化适应性\n- 识别哪些语言的翻译可能需要改进\n\n请以有效的json格式提供你的评判，结构如下：\n{\n\
+            \  \"judgments\": [\n    {\n      \"mapping_id\": 1,\n      \"specialty_score\"\
+            : 5,\n      \"accuracy_scores\": {\n        \"en-us\": 5,\n        \"\
+            ja-jp\": 4,\n        ...\n      },\n      \"consistency_score\": 4,\n\
+            \      \"overall_score\": 4.5\n    }\n  ]\n}\n\n不要在json标签前后包含任何文本。"
+        - id: c4f837e9-029c-4897-b702-8235547e871c
+          role: user
+          text: '请严格评估以下多语言术语映射，特别关注是否真正需要作为专业术语收录以及跨语言一致性：
+
+
+            {{#1743125135494.text#}}
+
+
+            请对每个映射提供以下评分：
+
+            1. 专业度评分（1-5）：这真的是专业术语吗？还是常用词？
+
+            2. 各语言准确性评分（1-5）：每种语言翻译的准确程度如何？
+
+            3. 跨语言一致性评分（1-5）：不同语言间的翻译概念是否一致？
+
+            4. 总体评分（1-5）：综合考虑后的最终分数
+
+
+            特别注意以下几点：
+
+            - 如果术语是常见词汇或一般表达，应给予低专业度分数
+
+            - 检查是否有被拆分的术语（如"防御"和"升高"应组合成"DEF Up"）
+
+            - 只有在特定领域有特殊含义的术语才应获得高专业度分数
+
+            - 分析不同语言间的翻译策略差异
+
+            - 识别文化适应性调整
+
+            - 评估哪些语言的翻译可能需要改进
+
+
+            请严格按照系统提示中的json格式提供评分。'
+        selected: false
+        title: Check
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 90
+      id: '1743125225178'
+      position:
+        x: 689
+        y: 282
+      positionAbsolute:
+        x: 689
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        code: "import json\n\ndef main(judgement: str, extraction:str) -> dict:\n\
+          \    json_body = judgement.split(\"</think>\")[1]\n    json_body = json_body.replace('```json',\
+          \ '').replace('```', '')\n    judge_obj = json.loads(json_body)\n    terms_obj\
+          \ = json.loads(extraction)\n\n    term_cnt = len(terms_obj[\"extracted_terms\"\
+          ])\n\n    for idx in range(term_cnt):\n        terms_obj[\"extracted_terms\"\
+          ][idx][\"specialty_score\"] = judge_obj[\"judgments\"][idx][\"specialty_score\"\
+          ]\n        terms_obj[\"extracted_terms\"][idx][\"accuracy_scores\"] = judge_obj[\"\
+          judgments\"][idx][\"accuracy_scores\"]\n\n    return {\n        \"terms_obj\"\
+          \ : terms_obj\n    }"
+        code_language: python3
+        desc: ''
+        outputs:
+          terms_obj:
+            children: null
+            type: object
+        selected: false
+        title: Code
+        type: code
+        variables:
+        - value_selector:
+          - '1743125225178'
+          - text
+          variable: judgement
+        - value_selector:
+          - '1743125135494'
+          - text
+          variable: extraction
+      height: 54
+      id: '1743125333411'
+      position:
+        x: 993
+        y: 282
+      positionAbsolute:
+        x: 993
+        y: 282
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - '1743125333411'
+          - terms_obj
+          variable: results
+        selected: false
+        title: End
+        type: end
+      height: 90
+      id: '1743125432094'
+      position:
+        x: 1297
+        y: 282
+      positionAbsolute:
+        x: 1297
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        author: ybalbert
+        desc: ''
+        height: 421
+        selected: false
+        showAuthor: true
+        text: '{"root":{"children":[{"children":[{"detail":0,"format":1,"mode":"normal","style":"","text":"##
+          translation_pairs","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":1,"textStyle":""},{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"{","type":"text","version":1},{"type":"linebreak","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":"    ","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"zh-cn\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":":","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"瞒天乐游·曙影
+          推荐搭配\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":",","type":"text","version":1},{"type":"linebreak","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":"    ","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"zh-tw\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":":","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"瞞天樂遊·曙影
+          推薦搭配\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":",","type":"text","version":1},{"type":"linebreak","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":"    ","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"en-us\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":":","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"Recommended
+          for Jovial Deception: Shadowdimmer\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":",","type":"text","version":1},{"type":"linebreak","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":"    ","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"id-id\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":":","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"Direkomendasikan
+          untuk Jovial Deception: Shadowdimmer\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":",","type":"text","version":1},{"type":"linebreak","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":"    ","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"ja-jp\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":":","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"瞞天嬉遊・旭影
+          おすすめ装備\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":",","type":"text","version":1},{"type":"linebreak","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":"    ","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"ko-kr\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":":","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"기만·여명의
+          그림자 추천 조합\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":",","type":"text","version":1},{"type":"linebreak","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":"    ","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"th-th\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":":","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"แนะนำสำหรับ
+          Jovial Deception: Shadowdimmer\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":",","type":"text","version":1},{"type":"linebreak","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":"    ","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"vi-vn\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":":","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"Tương
+          thích Jovial Deception: Shadowdimmer\"","type":"text","version":1},{"type":"linebreak","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":"}","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}'
+        theme: blue
+        title: ''
+        type: ''
+        width: 323
+      height: 421
+      id: '1743134969142'
+      position:
+        x: 5.190101268910894
+        y: -168
+      positionAbsolute:
+        x: 5.190101268910894
+        y: -168
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom-note
+      width: 323
+    - data:
+        author: ybalbert
+        desc: ''
+        height: 423
+        selected: false
+        showAuthor: true
+        text: '{"root":{"children":[{"children":[{"detail":0,"format":1,"mode":"normal","style":"","text":"##
+          translation_pairs","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":1,"textStyle":""},{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""},{"children":[{"detail":0,"format":0,"mode":"normal","style":"","text":"{","type":"text","version":1},{"type":"linebreak","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":"    ","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"zh-cn\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":":","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"「从此，瓯夏和琅丘的人们团结一心，幸福快乐地生活了下去。」\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":",","type":"text","version":1},{"type":"linebreak","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":"    ","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"zh-tw\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":":","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"「從此，甌夏和琅丘的人們團結一心，幸福快樂地生活了下去。」\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":",","type":"text","version":1},{"type":"linebreak","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":"    ","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"en-us\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":":","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"The
+          people of Oxia and Langqiu came together and lived happily ever after.\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":",","type":"text","version":1},{"type":"linebreak","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":"    ","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"id-id\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":":","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"Sejak
+          saat itu, masyarakat Oxia dan Langqiu bersatu dan hidup bahagia.\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":",","type":"text","version":1},{"type":"linebreak","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":"    ","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"ja-jp\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":":","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"「こうして
+          甌夏と琅丘の人々は一致団結して 幸せそうに暮らしました」\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":",","type":"text","version":1},{"type":"linebreak","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":"    ","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"ko-kr\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":":","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"이렇게
+          옥시아와 랑추 사람들은 마음을 모아 행복하게 살았답니다\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":",","type":"text","version":1},{"type":"linebreak","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":"    ","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"th-th\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":":","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"ตั้งแต่นั้นมา
+          ชาว Oxia และ Langqiu ก็ได้รวมใจกัน และใช้ชีวิตอย่างมีความสุข\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":",","type":"text","version":1},{"type":"linebreak","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":"    ","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"vi-vn\"","type":"text","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":":","type":"text","version":1},{"detail":0,"format":1,"mode":"normal","style":"","text":"\"Từ
+          đó về sau, người dân Oxia và Langqiu đoàn kết với nhau, sống hạnh phúc và
+          vui vẻ.\"","type":"text","version":1},{"type":"linebreak","version":1},{"detail":0,"format":0,"mode":"normal","style":"","text":"}","type":"text","version":1}],"direction":"ltr","format":"","indent":0,"type":"paragraph","version":1,"textFormat":0,"textStyle":""}],"direction":"ltr","format":"","indent":0,"type":"root","version":1}}'
+        theme: blue
+        title: ''
+        type: ''
+        width: 396
+      height: 423
+      id: '1743134971606'
+      position:
+        x: 408
+        y: -168
+      positionAbsolute:
+        x: 408
+        y: -168
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom-note
+      width: 396
+    viewport:
+      x: 552.3603662217408
+      y: 303.48864356736567
+      zoom: 0.7663099801038933

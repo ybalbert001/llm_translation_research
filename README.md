@@ -1,44 +1,28 @@
 # 大语言模型翻译 - Research
 
 ## 数据情况
-目前数据集局限在商品Title翻译场景，也可以扩展到其他的场景 
 
-1. 原始数据集：
+|数据领域|原始来源|数据详情|
+|---|---|---|
+|游戏|[genshin-impact-ja-zh](https://www.kaggle.com/datasets/toshihikochen/genshin-impact-ja-zh)|原神的公开数据, 存在中文/英文/日文的ground truth|
+|电商|[McAuley-Lab/Amazon-Reviews-2023](https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023)|亚马逊商品评论数据中的商品标题, 不存在ground truth, 以Claude Sonnet 3.5翻译结果作为Ground truth|
+|混合|[Kaggle_Data](https://www.kaggle.com/datasets/qianhuan/translation/data)|各种类型的数据兼有，存在中文/英文的ground truth|
 
-```https://huggingface.co/datasets/McAuley-Lab/Amazon-Reviews-2023/tree/main/raw/meta_categories```
-
-2. 原文数据(for Batch Inference - jsonl)
-
-```s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-input/{model_name}/```
-
-3. 译文数据(Batch Inference result - jsonl)
-```
-s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/haiku3/
-
-s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/nova-lite/
-
-s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/c35-v2/
-...
-```
-
-以上数据分别被挂载为athena表
-- claude_inference_table
-- nova_inference_table
-- translation_combine (对比数据表)
-
-4. 翻译质量评估输入数据(novaLite vs c35-v2)
-
-   ```s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-input/translation_eval/```
-
-5. 翻译质量评估结果数据
-
-   ```s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/translation_eval/```
-
-## 初步计划
-1. 先局限在“英翻中”
-2. 实验所有的优化手段进行对比
+## 研究范围
+1. LLM翻译的问题分析以及总结
+2. LLM翻译质量的评估方法
+3. 多个模型的翻译能力评估
+   1. haiku3
+   2. nove-lite
+   3. claude sonnet 3.5-v2
+   4. claude sonnet 3.7
+4. 实验所有的优化手段进行对比
+   1. Prompt/Agent-based的优化思路
+   2. RAG-based的优化思路
+   3. 翻译质量纠察/评估器
 
 ## 实施步骤
- - [准备翻译数据](./1.data_preparation/README.md)
- - [比较模型翻译质量](./2.llm-as-a-judge/README.md)
- - [准备评估器的训练数据](./3.train_evaluator/README.md)
+ - [翻译数据预处理](./1_data_preparation/README.md)
+ - [Prompt-based的优化思路](./2_prompt_based_optimization/README.md)
+ - [RAG-based的优化思路](./3_retrieval_based_optimization/README.md)
+ - [翻译质量评估器](./4_translation_evaluator/README.md)

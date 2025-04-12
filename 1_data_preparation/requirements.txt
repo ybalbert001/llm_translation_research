@@ -1,0 +1,5 @@
+pandas
+boto3
+jsonlines
+pandas>=1.3.0
+pyarrow>=7.0.0

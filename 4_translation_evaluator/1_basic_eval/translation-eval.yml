@@ -1,0 +1,447 @@
+app:
+  description: ''
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  mode: workflow
+  name: translation-eval
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: package
+  value:
+    plugin_unique_identifier: langgenius/aws_tools:0.0.7@fc8f719716c45a0bc80eba8a08f3454c5d6d766dec6a4626b47d1a7fee376206
+- current_identifier: null
+  type: package
+  value:
+    plugin_unique_identifier: langgenius/bedrock:0.0.10@e23fcddb79a93f15f73bceaf9e00f1b3558f0e5b188e2f7e543946502083be78
+kind: app
+version: 0.1.5
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        sourceType: start
+        targetType: llm
+      id: 1743828353105-source-1743833866983-target
+      source: '1743828353105'
+      sourceHandle: source
+      target: '1743833866983'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: llm
+        targetType: code
+      id: 1743833866983-source-1743834711243-target
+      source: '1743833866983'
+      sourceHandle: source
+      target: '1743834711243'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: code
+        targetType: end
+      id: 1743834711243-source-1743828734918-target
+      source: '1743834711243'
+      sourceHandle: source
+      target: '1743828734918'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: start
+        targetType: tool
+      id: 1743828353105-source-1743986823028-target
+      source: '1743828353105'
+      sourceHandle: source
+      target: '1743986823028'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: tool
+        targetType: code
+      id: 1743986823028-source-1743834711243-target
+      source: '1743986823028'
+      sourceHandle: source
+      target: '1743834711243'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: Start
+        type: start
+        variables:
+        - label: source
+          max_length: 4800
+          options: []
+          required: false
+          type: paragraph
+          variable: source
+        - label: translation
+          max_length: 4800
+          options: []
+          required: true
+          type: paragraph
+          variable: translation
+        - allowed_file_extensions: []
+          allowed_file_types:
+          - image
+          allowed_file_upload_methods:
+          - local_file
+          - remote_url
+          label: label
+          max_length: 4800
+          options: []
+          required: false
+          type: paragraph
+          variable: label
+      height: 142
+      id: '1743828353105'
+      position:
+        x: 84.49212517526524
+        y: 270.769687061837
+      positionAbsolute:
+        x: 84.49212517526524
+        y: 270.769687061837
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - '1743834711243'
+          - llm_score
+          variable: llm_score
+        - value_selector:
+          - '1743834711243'
+          - sacrebleu
+          variable: sacrebleu
+        - value_selector:
+          - '1743834711243'
+          - meteor
+          variable: meteor
+        - value_selector:
+          - '1743834711243'
+          - nist
+          variable: nist
+        selected: false
+        title: End
+        type: end
+      height: 168
+      id: '1743828734918'
+      position:
+        x: 1225.8634703015196
+        y: 270.769687061837
+      positionAbsolute:
+        x: 1225.8634703015196
+        y: 270.769687061837
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: ''
+        model:
+          completion_params:
+            stop: []
+            temperature: 0.7
+          mode: chat
+          name: us.anthropic.claude-3-5-sonnet-20240620-v1:0
+          provider: langgenius/bedrock/bedrock
+        prompt_template:
+        - id: 0d2cbf3a-37b8-4347-a7bd-b6d9155cc124
+          role: system
+          text: "You are an expert linguist specializing in translation quality assessment.\
+            \ Your task is to evaluate translations produced by different language\
+            \ models from a given source text. Assess each translation based on the\
+            \ following criteria:\n\n  1. Sensitive content should not be refused\
+            \ to translate\n  2. No non-target language word appears\n  3. No adding\
+            \ irrelevant words\n  4. No Spelling, abnormal symbols and grammar errors\
+            \ detected\n  5. Quantity, Quantifiers and Units are translated accurately\n\
+            \  6. Format maintained between source and translation. No added numbering/bullet\n\
+            \  7. key words are translated accurately with appropriate word"
+        - id: cd6ed23b-8e15-47a6-b0b7-13cc5cf3a228
+          role: user
+          text: "## Source Text\n<source>\n<content>{{#1743828353105.source#}}</content>\n\
+            </source>\n\n## Translations\n<translation>\n<content>{{#1743828353105.translation#}}</content>\n\
+            </translation>\n\n## Ground Truth\n<ground_truth>\n<content>{{#1743828353105.label#}}</content>\n\
+            </ground_truth>\n\n## Evaluation Example\n```json\n{ \"thought\" : \"\
+            ....\", scores : [...]}\n```\n\n## Notice\n1.  If ground truth is provided,\
+            \ you can reference it.\n2. Only provide factual observations for imperfect\
+            \ parts in the translation, without giving summarizing conclusions.\n\
+            3. Please rate each translation in these 7 aspects (score range: 0 - 10.0),\
+            \ the \"scores\" should be a list with a length of 7. \n4. Output Format\
+            \ is json, don't export line break\n"
+        selected: true
+        title: LLM
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 90
+      id: '1743833866983'
+      position:
+        x: 490.68797291254896
+        y: 408.75393741236735
+      positionAbsolute:
+        x: 490.68797291254896
+        y: 408.75393741236735
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        code: "import json\ndef main(llm_output: str, metric_output:list[dict]) ->\
+          \ dict:\n    llm_eval = json.loads(llm_output)\n    llm_score = llm_eval[\"\
+          scores\"]\n    metric = metric_output[0][\"metric\"]\n\n    return {\n \
+          \       \"llm_score\" : llm_score[-1],\n        \"nist\" : metric[\"nist\"\
+          ],\n        \"meteor\" : metric[\"meteor\"],\n        \"sacrebleu\" : metric[\"\
+          sacrebleu\"]\n    }\n\n    # return {\n    #     \"sacrebleu\" : output.get(\"\
+          sacrebleu\"),\n    #     \"meteor\" : output.get(\"meteor\"),\n    #   \
+          \  \"nist\" : output.get(\"nist\")\n    # }\n"
+        code_language: python3
+        desc: ''
+        outputs:
+          llm_score:
+            children: null
+            type: number
+          meteor:
+            children: null
+            type: number
+          nist:
+            children: null
+            type: number
+          sacrebleu:
+            children: null
+            type: number
+        selected: false
+        title: Code
+        type: code
+        variables:
+        - value_selector:
+          - '1743833866983'
+          - text
+          variable: llm_output
+        - value_selector:
+          - '1743986823028'
+          - json
+          variable: metric_output
+      height: 54
+      id: '1743834711243'
+      position:
+        x: 847.2468011654054
+        y: 270.769687061837
+      positionAbsolute:
+        x: 847.2468011654054
+        y: 270.769687061837
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        is_team_authorization: true
+        output_schema: null
+        paramSchemas:
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: the source content of the translation
+            ja_JP: the source content of the translation
+            pt_BR: the source content of the translation
+            zh_Hans: 翻译原文内容
+          label:
+            en_US: the source content of the translation
+            ja_JP: the source content of the translation
+            pt_BR: the source content of the translation
+            zh_Hans: 翻译原文内容
+          llm_description: the source content of the translation
+          max: null
+          min: null
+          name: source
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: string
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: the target content of translation
+            ja_JP: the target content of translation
+            pt_BR: the target content of translation
+            zh_Hans: 翻译译文内容
+          label:
+            en_US: the target content of translation
+            ja_JP: the target content of translation
+            pt_BR: the target content of translation
+            zh_Hans: 翻译译文内容
+          llm_description: the target content of translation
+          max: null
+          min: null
+          name: translation
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: string
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: the label of translation
+            ja_JP: the label of translation
+            pt_BR: the label of translation
+            zh_Hans: 参考译文
+          label:
+            en_US: the label of translation
+            ja_JP: the label of translation
+            pt_BR: the label of translation
+            zh_Hans: 参考译文
+          llm_description: the label of translation
+          max: null
+          min: null
+          name: label
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: string
+        - auto_generate: null
+          default: null
+          form: form
+          human_description:
+            en_US: The endpoint of model evaluator
+            ja_JP: The endpoint of model evaluator
+            pt_BR: The endpoint of model evaluator
+            zh_Hans: 评估模型的端点
+          label:
+            en_US: The endpoint of model evaluator
+            ja_JP: The endpoint of model evaluator
+            pt_BR: The endpoint of model evaluator
+            zh_Hans: 评估模型的端点
+          llm_description: ''
+          max: null
+          min: null
+          name: model_endpoint
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: string
+        params:
+          label: ''
+          model_endpoint: ''
+          source: ''
+          translation: ''
+        provider_id: langgenius/aws_tools/aws_tools
+        provider_name: langgenius/aws_tools/aws_tools
+        provider_type: builtin
+        selected: false
+        title: TranslationEvaluator
+        tool_configurations:
+          model_endpoint: null
+        tool_label: TranslationEvaluator
+        tool_name: translation_evaluator
+        tool_parameters:
+          label:
+            type: mixed
+            value: '{{#1743828353105.label#}}'
+          source:
+            type: mixed
+            value: '{{#1743828353105.source#}}'
+          translation:
+            type: mixed
+            value: '{{#1743828353105.translation#}}'
+        type: tool
+      height: 90
+      id: '1743986823028'
+      position:
+        x: 490.68797291254896
+        y: 270.769687061837
+      positionAbsolute:
+        x: 490.68797291254896
+        y: 270.769687061837
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    viewport:
+      x: 118.57315142733955
+      y: 100.06704192722589
+      zoom: 0.6678606227529595

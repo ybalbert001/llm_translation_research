@@ -1,0 +1,1511 @@
+app:
+  description: ''
+  icon: 🤖
+  icon_background: '#FFEAD5'
+  mode: workflow
+  name: Translate_ReSearch_Mihoyo_Genshin
+  use_icon_as_answer_icon: false
+dependencies:
+- current_identifier: null
+  type: package
+  value:
+    plugin_unique_identifier: langgenius/aws_tools:0.0.7@fc8f719716c45a0bc80eba8a08f3454c5d6d766dec6a4626b47d1a7fee376206
+- current_identifier: null
+  type: package
+  value:
+    plugin_unique_identifier: langgenius/bedrock:0.0.10@e23fcddb79a93f15f73bceaf9e00f1b3558f0e5b188e2f7e543946502083be78
+kind: app
+version: 0.1.5
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      fileUploadConfig:
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        image_file_size_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        sourceType: knowledge-retrieval
+        targetType: code
+      id: 1742265578390-source-1742265679568-target
+      source: '1742265578390'
+      sourceHandle: source
+      target: '1742265679568'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: code
+        targetType: llm
+      id: 1742265679568-source-1742265718370-target
+      source: '1742265679568'
+      sourceHandle: source
+      target: '1742265718370'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: llm
+        targetType: end
+      id: 1742265718370-source-1742265630938-target
+      source: '1742265718370'
+      sourceHandle: source
+      target: '1742265630938'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: if-else
+        targetType: knowledge-retrieval
+      id: 1742346356210-d2d9c1ed-04bb-45ce-a97f-a5f3b0de8d15-1742265578390-target
+      source: '1742346356210'
+      sourceHandle: d2d9c1ed-04bb-45ce-a97f-a5f3b0de8d15
+      target: '1742265578390'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: if-else
+        targetType: llm
+      id: 1742346356210-true-17423464514690-target
+      source: '1742346356210'
+      sourceHandle: 'true'
+      target: '17423464514690'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: llm
+        targetType: end
+      id: 17423464514690-source-1742346479543-target
+      source: '17423464514690'
+      sourceHandle: source
+      target: '1742346479543'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: knowledge-retrieval
+        targetType: code
+      id: 1742363778984-source-1742363788588-target
+      source: '1742363778984'
+      sourceHandle: source
+      target: '1742363788588'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: tool
+        targetType: code
+      id: 1742363784424-source-1742363788588-target
+      source: '1742363784424'
+      sourceHandle: source
+      target: '1742363788588'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: tool
+        targetType: code
+      id: 1742346787860-source-1742363800597-target
+      source: '1742346787860'
+      sourceHandle: source
+      target: '1742363800597'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: code
+        targetType: llm
+      id: 1742363800597-source-17423638112020-target
+      source: '1742363800597'
+      sourceHandle: source
+      target: '17423638112020'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: code
+        targetType: llm
+      id: 1742363788588-source-17423638233300-target
+      source: '1742363788588'
+      sourceHandle: source
+      target: '17423638233300'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: llm
+        targetType: end
+      id: 17423638112020-source-1742363830716-target
+      source: '17423638112020'
+      sourceHandle: source
+      target: '1742363830716'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: llm
+        targetType: end
+      id: 17423638233300-source-1742363832854-target
+      source: '17423638233300'
+      sourceHandle: source
+      target: '1742363832854'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: start
+        targetType: if-else
+      id: 1742265572662-source-1742346356210-target
+      source: '1742265572662'
+      sourceHandle: source
+      target: '1742346356210'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: if-else
+        targetType: tool
+      id: 1742346356210-4cfacc17-c1ef-4094-85a2-c2d3e43f2a21-1742346787860-target
+      source: '1742346356210'
+      sourceHandle: 4cfacc17-c1ef-4094-85a2-c2d3e43f2a21
+      target: '1742346787860'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: if-else
+        targetType: knowledge-retrieval
+      id: 1742346356210-dc10e2d5-4e39-4139-8eb1-2b404050a39b-1742363778984-target
+      source: '1742346356210'
+      sourceHandle: dc10e2d5-4e39-4139-8eb1-2b404050a39b
+      target: '1742363778984'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: if-else
+        targetType: tool
+      id: 1742346356210-dc10e2d5-4e39-4139-8eb1-2b404050a39b-1742363784424-target
+      source: '1742346356210'
+      sourceHandle: dc10e2d5-4e39-4139-8eb1-2b404050a39b
+      target: '1742363784424'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: if-else
+        targetType: llm
+      id: 1742346356210-false-17423464514690-target
+      selected: false
+      source: '1742346356210'
+      sourceHandle: 'false'
+      target: '17423464514690'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: ''
+        selected: false
+        title: Start
+        type: start
+        variables:
+        - label: src
+          max_length: 4800
+          options: []
+          required: true
+          type: paragraph
+          variable: src
+        - label: src_lang
+          max_length: 48
+          options: []
+          required: true
+          type: text-input
+          variable: src_lang
+        - allowed_file_extensions: []
+          allowed_file_types:
+          - image
+          allowed_file_upload_methods:
+          - local_file
+          - remote_url
+          label: dest_lang
+          max_length: 48
+          options: []
+          required: true
+          type: text-input
+          variable: dest_lang
+        - label: Optimization
+          max_length: 48
+          options:
+          - 'No'
+          - Reference_Retrieval
+          - Glossary_Retrieval
+          - ReferenceAndGlossary_Retrieval
+          required: true
+          type: select
+          variable: Optimization
+        - label: label
+          max_length: 4800
+          options: []
+          required: false
+          type: paragraph
+          variable: label
+      height: 194
+      id: '1742265572662'
+      position:
+        x: 203.9352239918049
+        y: 202.49489873003358
+      positionAbsolute:
+        x: 203.9352239918049
+        y: 202.49489873003358
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        dataset_ids:
+        - 840715df-023d-41b3-a143-411d7b9b45bf
+        desc: ''
+        multiple_retrieval_config:
+          reranking_enable: true
+          reranking_mode: weighted_score
+          top_k: 4
+          weights:
+            keyword_setting:
+              keyword_weight: 0
+            vector_setting:
+              embedding_model_name: cohere.embed-multilingual-v3
+              embedding_provider_name: langgenius/bedrock/bedrock
+              vector_weight: 1
+        query_variable_selector:
+        - '1742265572662'
+        - src
+        retrieval_mode: multiple
+        selected: false
+        title: Knowledge Retrieval
+        type: knowledge-retrieval
+      height: 92
+      id: '1742265578390'
+      position:
+        x: 1009.0583324709842
+        y: 123.21297575347828
+      positionAbsolute:
+        x: 1009.0583324709842
+        y: 123.21297575347828
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - '1742265718370'
+          - text
+          variable: translation
+        - value_selector:
+          - '1742265572662'
+          - src
+          variable: source
+        - value_selector:
+          - '1742265572662'
+          - label
+          variable: label
+        selected: false
+        title: End
+        type: end
+      height: 142
+      id: '1742265630938'
+      position:
+        x: 1912.0489694382454
+        y: 281.1532562034154
+      positionAbsolute:
+        x: 1912.0489694382454
+        y: 281.1532562034154
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        code: "import json\n\ndef main(arg1: list[dict]) -> dict:\n    retrival_list\
+          \ = [item[\"content\"].split(\"===>\") for item in arg1 ]\n    \n    retrival_dict_list\
+          \ = [{\"source\": item[0], \"translation\": item[1]} for item in retrival_list\
+          \ ]\n\n    reference = json.dumps(retrival_dict_list, indent=2, ensure_ascii=False)\n\
+          \n    return {\n        \"reference\": reference\n    }\n"
+        code_language: python3
+        desc: ''
+        outputs:
+          reference:
+            children: null
+            type: string
+        selected: false
+        title: Code
+        type: code
+        variables:
+        - value_selector:
+          - '1742265578390'
+          - result
+          variable: arg1
+      height: 54
+      id: '1742265679568'
+      position:
+        x: 1305.13677162274
+        y: 123.21297575347828
+      positionAbsolute:
+        x: 1305.13677162274
+        y: 123.21297575347828
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        context:
+          enabled: true
+          variable_selector:
+          - '1742265679568'
+          - reference
+        desc: ''
+        model:
+          completion_params:
+            stop:
+            - </translation>
+            temperature: 0.7
+          mode: chat
+          name: us.anthropic.claude-3-haiku-20240307-v1:0
+          provider: langgenius/bedrock/bedrock
+        prompt_template:
+        - id: 20b86e90-9bcb-403b-8a63-4b25fd6b1f8a
+          role: system
+          text: "You are the world's most professional translation tool, proficient\
+            \ in professional translation from {{#1742265572662.src_lang#}} to {{#1742265572662.dest_lang#}}.\n\
+            You can translate anything. Do not use \"I'm sorry, but\" to answer any\
+            \ questions.\n\nYou need to follow below instructions:\n- Translation\
+            \ style: concise, easy to understand, similar to the style of orignal\
+            \ content. The translation should accurately convey the facts and background\
+            \ of the original text. Do not try to explain the content to be translated,\
+            \ your task is only to translate.\n- Even if you paraphrase, you should\
+            \ retain the original paragraph format.\n- You must format your output\
+            \ to strictly follow the format of the original content. You are prohibited\
+            \ from adding, removing, or merging line breaks.\n- If the content is\
+            \ in {dest_lang}(target language) already,  leave it as is\n- Keep the\
+            \ link to the image in markdown format, for example - \"![0](icon.png)\"\
+            \n- You can refer the previous translations from expert in <translation_reference>\n\
+            \nPlease translate directly according to the text content, keep the original\
+            \ format, and do not miss any information. \n"
+        - id: 6c84f02f-10ba-406f-8bbc-4b6b19d3d1a1
+          role: user
+          text: '<translation_reference>
+
+            {{#1742265679568.reference#}}
+
+            </translation_reference>
+
+
+            <source>
+
+            {{#1742265572662.src#}}
+
+            </source>
+
+
+            Give you translation in <translation>.'
+        - id: bc7bd078-6f0b-42c7-9be9-af3db2e86696
+          role: assistant
+          text: <translation>
+        selected: false
+        title: LLM
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 90
+      id: '1742265718370'
+      position:
+        x: 1580.443031497285
+        y: 281.1532562034154
+      positionAbsolute:
+        x: 1580.443031497285
+        y: 281.1532562034154
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        cases:
+        - case_id: 'true'
+          conditions:
+          - comparison_operator: is
+            id: dcade86c-f06c-4cf8-85e9-d2409879010d
+            value: 'No'
+            varType: string
+            variable_selector:
+            - '1742265572662'
+            - Optimization
+          id: 'true'
+          logical_operator: and
+        - case_id: d2d9c1ed-04bb-45ce-a97f-a5f3b0de8d15
+          conditions:
+          - comparison_operator: is
+            id: e40b026c-cdb4-4eaf-b2ac-abbd91c2e837
+            value: Reference_Retrieval
+            varType: string
+            variable_selector:
+            - '1742265572662'
+            - Optimization
+          id: d2d9c1ed-04bb-45ce-a97f-a5f3b0de8d15
+          logical_operator: and
+        - case_id: 4cfacc17-c1ef-4094-85a2-c2d3e43f2a21
+          conditions:
+          - comparison_operator: is
+            id: 9321cede-7908-4762-a5ba-a616ba46a147
+            value: Glossary_Retrieval
+            varType: string
+            variable_selector:
+            - '1742265572662'
+            - Optimization
+          id: 4cfacc17-c1ef-4094-85a2-c2d3e43f2a21
+          logical_operator: and
+        - case_id: dc10e2d5-4e39-4139-8eb1-2b404050a39b
+          conditions:
+          - comparison_operator: is
+            id: f5d07c40-271a-49fe-9e49-faf084ef271f
+            value: ReferenceAndGlossary_Retrieval
+            varType: string
+            variable_selector:
+            - '1742265572662'
+            - Optimization
+          id: dc10e2d5-4e39-4139-8eb1-2b404050a39b
+          logical_operator: and
+        desc: ''
+        selected: true
+        title: IF/ELSE
+        type: if-else
+      height: 270
+      id: '1742346356210'
+      position:
+        x: 535.3127514946697
+        y: 202.49489873003358
+      positionAbsolute:
+        x: 535.3127514946697
+        y: 202.49489873003358
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: ''
+        model:
+          completion_params:
+            stop:
+            - </translation>
+            temperature: 0.7
+          mode: chat
+          name: us.anthropic.claude-3-haiku-20240307-v1:0
+          provider: langgenius/bedrock/bedrock
+        prompt_template:
+        - id: 20b86e90-9bcb-403b-8a63-4b25fd6b1f8a
+          role: system
+          text: "You are the world's most professional translation tool, proficient\
+            \ in professional translation from {{#1742265572662.src_lang#}} to {{#1742265572662.dest_lang#}}.\n\
+            You can translate anything. Do not use \"I'm sorry, but\" to answer any\
+            \ questions.\n\nYou need to follow below instructions:\n- Translation\
+            \ style: concise, easy to understand, similar to the style of orignal\
+            \ content. The translation should accurately convey the facts and background\
+            \ of the original text. Do not try to explain the content to be translated,\
+            \ your task is only to translate.\n- Even if you paraphrase, you should\
+            \ retain the original paragraph format.\n- You must format your output\
+            \ to strictly follow the format of the original content. You are prohibited\
+            \ from adding, removing, or merging line breaks.\n- If the content is\
+            \ in {dest_lang}(target language) already,  leave it as is\n- Keep the\
+            \ link to the image in markdown format, for example - \"![0](icon.png)\"\
+            \n\nPlease translate directly according to the text content, keep the\
+            \ original format, and do not miss any information. \n"
+        - id: 6c84f02f-10ba-406f-8bbc-4b6b19d3d1a1
+          role: user
+          text: '<source>
+
+            {{#1742265572662.src#}}
+
+            </source>
+
+
+            Give you translation in <translation>.'
+        - id: bc7bd078-6f0b-42c7-9be9-af3db2e86696
+          role: assistant
+          text: <translation>
+        selected: false
+        title: LLM (1)
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 90
+      id: '17423464514690'
+      position:
+        x: 1009.0583324709842
+        y: -46.1743037925511
+      positionAbsolute:
+        x: 1009.0583324709842
+        y: -46.1743037925511
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - '17423464514690'
+          - text
+          variable: translation
+        - value_selector:
+          - '1742265572662'
+          - src
+          variable: source
+        - value_selector:
+          - '1742265572662'
+          - label
+          variable: label
+        selected: false
+        title: End 2
+        type: end
+      height: 142
+      id: '1742346479543'
+      position:
+        x: 1912.0489694382454
+        y: 141.3797792417493
+      positionAbsolute:
+        x: 1912.0489694382454
+        y: 141.3797792417493
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        is_team_authorization: true
+        output_schema: null
+        paramSchemas:
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: source content for translation
+            ja_JP: source content for translation
+            pt_BR: source content for translation
+            zh_Hans: 待翻译原文
+          label:
+            en_US: source content for translation
+            ja_JP: source content for translation
+            pt_BR: source content for translation
+            zh_Hans: 待翻译原文
+          llm_description: source content for translation
+          max: null
+          min: null
+          name: text_content
+          options: []
+          placeholder: null
+          precision: null
+          required: true
+          scope: null
+          template: null
+          type: string
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: source language code
+            ja_JP: source language code
+            pt_BR: source language code
+            zh_Hans: 原文语言代号
+          label:
+            en_US: source language code
+            ja_JP: source language code
+            pt_BR: source language code
+            zh_Hans: 原文语言代号
+          llm_description: source language code
+          max: null
+          min: null
+          name: src_lang
+          options: []
+          placeholder: null
+          precision: null
+          required: true
+          scope: null
+          template: null
+          type: string
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: target language code
+            ja_JP: target language code
+            pt_BR: target language code
+            zh_Hans: 目标语言代号
+          label:
+            en_US: target language code
+            ja_JP: target language code
+            pt_BR: target language code
+            zh_Hans: 目标语言代号
+          llm_description: target language code
+          max: null
+          min: null
+          name: dest_lang
+          options: []
+          placeholder: null
+          precision: null
+          required: true
+          scope: null
+          template: null
+          type: string
+        - auto_generate: null
+          default: null
+          form: form
+          human_description:
+            en_US: region of Lambda
+            ja_JP: region of Lambda
+            pt_BR: region of Lambda
+            zh_Hans: Lambda 所在的region
+          label:
+            en_US: region of Lambda
+            ja_JP: region of Lambda
+            pt_BR: region of Lambda
+            zh_Hans: Lambda 所在的region
+          llm_description: region of Lambda
+          max: null
+          min: null
+          name: aws_region
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: string
+        - auto_generate: null
+          default: anthropic.claude-3-sonnet-20240229-v1:0
+          form: form
+          human_description:
+            en_US: LLM model_id in bedrock
+            ja_JP: LLM model_id in bedrock
+            pt_BR: LLM model_id in bedrock
+            zh_Hans: bedrock上的大语言模型model_id
+          label:
+            en_US: LLM model_id in bedrock
+            ja_JP: LLM model_id in bedrock
+            pt_BR: LLM model_id in bedrock
+            zh_Hans: bedrock上的大语言模型model_id
+          llm_description: LLM model_id in bedrock
+          max: null
+          min: null
+          name: model_id
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: string
+        - auto_generate: null
+          default: null
+          form: form
+          human_description:
+            en_US: dictionary name for term mapping
+            ja_JP: dictionary name for term mapping
+            pt_BR: dictionary name for term mapping
+            zh_Hans: 专词映射表名称
+          label:
+            en_US: dictionary name for term mapping
+            ja_JP: dictionary name for term mapping
+            pt_BR: dictionary name for term mapping
+            zh_Hans: 专词映射表名称
+          llm_description: dictionary name for term mapping
+          max: null
+          min: null
+          name: dictionary_name
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: string
+        - auto_generate: null
+          default: term_mapping
+          form: form
+          human_description:
+            en_US: request type
+            ja_JP: request type
+            pt_BR: request type
+            zh_Hans: 请求类型
+          label:
+            en_US: request type
+            ja_JP: request type
+            pt_BR: request type
+            zh_Hans: 请求类型
+          llm_description: ''
+          max: null
+          min: null
+          name: request_type
+          options:
+          - label:
+              en_US: term_mapping
+              ja_JP: term_mapping
+              pt_BR: term_mapping
+              zh_Hans: 专词映射
+            value: term_mapping
+          - label:
+              en_US: segment_only
+              ja_JP: segment_only
+              pt_BR: segment_only
+              zh_Hans: 仅切词
+            value: segment_only
+          - label:
+              en_US: translate
+              ja_JP: translate
+              pt_BR: translate
+              zh_Hans: 翻译内容
+            value: translate
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: select
+        - auto_generate: null
+          default: translate_tool
+          form: form
+          human_description:
+            en_US: AWS Lambda  for term mapping retrieval
+            ja_JP: AWS Lambda  for term mapping retrieval
+            pt_BR: AWS Lambda  for term mapping retrieval
+            zh_Hans: 专词召回映射 - AWS Lambda
+          label:
+            en_US: AWS Lambda for term mapping retrieval
+            ja_JP: AWS Lambda for term mapping retrieval
+            pt_BR: lambda name for term mapping retrieval
+            zh_Hans: 专词召回映射 - AWS Lambda
+          llm_description: AWS Lambda  for term mapping retrieval
+          max: null
+          min: null
+          name: lambda_name
+          options: []
+          placeholder: null
+          precision: null
+          required: true
+          scope: null
+          template: null
+          type: string
+        params:
+          aws_region: ''
+          dest_lang: ''
+          dictionary_name: ''
+          lambda_name: ''
+          model_id: ''
+          request_type: ''
+          src_lang: ''
+          text_content: ''
+        provider_id: langgenius/aws_tools/aws_tools
+        provider_name: langgenius/aws_tools/aws_tools
+        provider_type: builtin
+        selected: false
+        title: TranslateTool
+        tool_configurations:
+          aws_region: ap-southeast-1
+          dictionary_name: genshin_auto_extraction
+          lambda_name: translate_tool
+          model_id: anthropic.claude-3-sonnet-20240229-v1:0
+          request_type: term_mapping
+        tool_label: TranslateTool
+        tool_name: lambda_translate_utils
+        tool_parameters:
+          dest_lang:
+            type: mixed
+            value: '{{#1742265572662.dest_lang#}}'
+          src_lang:
+            type: mixed
+            value: '{{#1742265572662.src_lang#}}'
+          text_content:
+            type: mixed
+            value: '{{#1742265572662.src#}}'
+        type: tool
+      height: 194
+      id: '1742346787860'
+      position:
+        x: 982.730449660992
+        y: 379.1133543165356
+      positionAbsolute:
+        x: 982.730449660992
+        y: 379.1133543165356
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        dataset_ids:
+        - 840715df-023d-41b3-a143-411d7b9b45bf
+        desc: ''
+        multiple_retrieval_config:
+          reranking_enable: true
+          reranking_mode: weighted_score
+          top_k: 4
+          weights:
+            keyword_setting:
+              keyword_weight: 0
+            vector_setting:
+              embedding_model_name: cohere.embed-multilingual-v3
+              embedding_provider_name: langgenius/bedrock/bedrock
+              vector_weight: 1
+        query_variable_selector:
+        - '1742265572662'
+        - src
+        retrieval_mode: multiple
+        selected: false
+        title: Knowledge Retrieval 2
+        type: knowledge-retrieval
+      height: 92
+      id: '1742363778984'
+      position:
+        x: 987.3127125529154
+        y: 593.3413165166824
+      positionAbsolute:
+        x: 987.3127125529154
+        y: 593.3413165166824
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        is_team_authorization: true
+        output_schema: null
+        paramSchemas:
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: source content for translation
+            ja_JP: source content for translation
+            pt_BR: source content for translation
+            zh_Hans: 待翻译原文
+          label:
+            en_US: source content for translation
+            ja_JP: source content for translation
+            pt_BR: source content for translation
+            zh_Hans: 待翻译原文
+          llm_description: source content for translation
+          max: null
+          min: null
+          name: text_content
+          options: []
+          placeholder: null
+          precision: null
+          required: true
+          scope: null
+          template: null
+          type: string
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: source language code
+            ja_JP: source language code
+            pt_BR: source language code
+            zh_Hans: 原文语言代号
+          label:
+            en_US: source language code
+            ja_JP: source language code
+            pt_BR: source language code
+            zh_Hans: 原文语言代号
+          llm_description: source language code
+          max: null
+          min: null
+          name: src_lang
+          options: []
+          placeholder: null
+          precision: null
+          required: true
+          scope: null
+          template: null
+          type: string
+        - auto_generate: null
+          default: null
+          form: llm
+          human_description:
+            en_US: target language code
+            ja_JP: target language code
+            pt_BR: target language code
+            zh_Hans: 目标语言代号
+          label:
+            en_US: target language code
+            ja_JP: target language code
+            pt_BR: target language code
+            zh_Hans: 目标语言代号
+          llm_description: target language code
+          max: null
+          min: null
+          name: dest_lang
+          options: []
+          placeholder: null
+          precision: null
+          required: true
+          scope: null
+          template: null
+          type: string
+        - auto_generate: null
+          default: null
+          form: form
+          human_description:
+            en_US: region of Lambda
+            ja_JP: region of Lambda
+            pt_BR: region of Lambda
+            zh_Hans: Lambda 所在的region
+          label:
+            en_US: region of Lambda
+            ja_JP: region of Lambda
+            pt_BR: region of Lambda
+            zh_Hans: Lambda 所在的region
+          llm_description: region of Lambda
+          max: null
+          min: null
+          name: aws_region
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: string
+        - auto_generate: null
+          default: anthropic.claude-3-sonnet-20240229-v1:0
+          form: form
+          human_description:
+            en_US: LLM model_id in bedrock
+            ja_JP: LLM model_id in bedrock
+            pt_BR: LLM model_id in bedrock
+            zh_Hans: bedrock上的大语言模型model_id
+          label:
+            en_US: LLM model_id in bedrock
+            ja_JP: LLM model_id in bedrock
+            pt_BR: LLM model_id in bedrock
+            zh_Hans: bedrock上的大语言模型model_id
+          llm_description: LLM model_id in bedrock
+          max: null
+          min: null
+          name: model_id
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: string
+        - auto_generate: null
+          default: null
+          form: form
+          human_description:
+            en_US: dictionary name for term mapping
+            ja_JP: dictionary name for term mapping
+            pt_BR: dictionary name for term mapping
+            zh_Hans: 专词映射表名称
+          label:
+            en_US: dictionary name for term mapping
+            ja_JP: dictionary name for term mapping
+            pt_BR: dictionary name for term mapping
+            zh_Hans: 专词映射表名称
+          llm_description: dictionary name for term mapping
+          max: null
+          min: null
+          name: dictionary_name
+          options: []
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: string
+        - auto_generate: null
+          default: term_mapping
+          form: form
+          human_description:
+            en_US: request type
+            ja_JP: request type
+            pt_BR: request type
+            zh_Hans: 请求类型
+          label:
+            en_US: request type
+            ja_JP: request type
+            pt_BR: request type
+            zh_Hans: 请求类型
+          llm_description: ''
+          max: null
+          min: null
+          name: request_type
+          options:
+          - label:
+              en_US: term_mapping
+              ja_JP: term_mapping
+              pt_BR: term_mapping
+              zh_Hans: 专词映射
+            value: term_mapping
+          - label:
+              en_US: segment_only
+              ja_JP: segment_only
+              pt_BR: segment_only
+              zh_Hans: 仅切词
+            value: segment_only
+          - label:
+              en_US: translate
+              ja_JP: translate
+              pt_BR: translate
+              zh_Hans: 翻译内容
+            value: translate
+          placeholder: null
+          precision: null
+          required: false
+          scope: null
+          template: null
+          type: select
+        - auto_generate: null
+          default: translate_tool
+          form: form
+          human_description:
+            en_US: AWS Lambda  for term mapping retrieval
+            ja_JP: AWS Lambda  for term mapping retrieval
+            pt_BR: AWS Lambda  for term mapping retrieval
+            zh_Hans: 专词召回映射 - AWS Lambda
+          label:
+            en_US: AWS Lambda for term mapping retrieval
+            ja_JP: AWS Lambda for term mapping retrieval
+            pt_BR: lambda name for term mapping retrieval
+            zh_Hans: 专词召回映射 - AWS Lambda
+          llm_description: AWS Lambda  for term mapping retrieval
+          max: null
+          min: null
+          name: lambda_name
+          options: []
+          placeholder: null
+          precision: null
+          required: true
+          scope: null
+          template: null
+          type: string
+        params:
+          aws_region: ''
+          dest_lang: ''
+          dictionary_name: ''
+          lambda_name: ''
+          model_id: ''
+          request_type: ''
+          src_lang: ''
+          text_content: ''
+        provider_id: langgenius/aws_tools/aws_tools
+        provider_name: langgenius/aws_tools/aws_tools
+        provider_type: builtin
+        selected: false
+        title: TranslateTool
+        tool_configurations:
+          aws_region: ap-southeast-1
+          dictionary_name: genshin_auto_extraction
+          lambda_name: translate_tool
+          model_id: anthropic.claude-3-sonnet-20240229-v1:0
+          request_type: term_mapping
+        tool_label: TranslateTool
+        tool_name: lambda_translate_utils
+        tool_parameters:
+          dest_lang:
+            type: mixed
+            value: '{{#1742265572662.dest_lang#}}'
+          src_lang:
+            type: mixed
+            value: '{{#1742265572662.src_lang#}}'
+          text_content:
+            type: mixed
+            value: '{{#1742265572662.src#}}'
+        type: tool
+      height: 194
+      id: '1742363784424'
+      position:
+        x: 987.3127125529154
+        y: 712.2762195898327
+      positionAbsolute:
+        x: 987.3127125529154
+        y: 712.2762195898327
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        code: "import json\n\ndef format_kb_retrieval(kb_examples) -> str:\n    retrival_list\
+          \ = [item[\"content\"].split(\"===>\") for item in kb_examples ]\n    \n\
+          \    retrival_dict_list = [{\"source\": item[0], \"translation\": item[1]}\
+          \ for item in retrival_list ]\n\n    reference = json.dumps(retrival_dict_list,\
+          \ indent=2, ensure_ascii=False)\n\n    return reference\n\ndef format_term_retrieval(json_str:\
+          \ str) -> str:\n    obj = json.loads(json_str)\n    mappings = []\n    for\
+          \ item in obj['translations'][0]['term_mapping']:\n        mappings.append(\"\
+          {}->{}\".format(item[0], item[1]))\n\n    return '\\n'.join(mappings)\n\n\
+          def main(kb_examples: list[dict], json_str: str) -> dict:\n    reference\
+          \ = format_kb_retrieval(kb_examples)\n    mappings = format_term_retrieval(json_str)\n\
+          \n    return {\n        \"reference\": reference,\n        \"mappings\"\
+          \ : mappings\n    }\n"
+        code_language: python3
+        desc: ''
+        outputs:
+          mappings:
+            children: null
+            type: string
+          reference:
+            children: null
+            type: string
+        selected: false
+        title: Code 2
+        type: code
+        variables:
+        - value_selector:
+          - '1742363778984'
+          - result
+          variable: kb_examples
+        - value_selector:
+          - '1742363784424'
+          - text
+          variable: json_str
+      height: 54
+      id: '1742363788588'
+      position:
+        x: 1291.9750815852453
+        y: 593.3413165166824
+      positionAbsolute:
+        x: 1291.9750815852453
+        y: 593.3413165166824
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        code: "import json\n\ndef main(json_str: str) -> dict:\n    obj = json.loads(json_str)\n\
+          \    mappings = []\n    for item in obj['translations'][0]['term_mapping']:\n\
+          \        mappings.append(\"{}->{}\".format(item[0], item[1]))\n\n    return\
+          \ { \"mappings\" : '\\n'.join(mappings) }\n"
+        code_language: python3
+        desc: ''
+        outputs:
+          mappings:
+            children: null
+            type: string
+        selected: false
+        title: Code 3
+        type: code
+        variables:
+        - value_selector:
+          - '1742346787860'
+          - text
+          variable: json_str
+      height: 54
+      id: '1742363800597'
+      position:
+        x: 1291.9750815852453
+        y: 379.1133543165356
+      positionAbsolute:
+        x: 1291.9750815852453
+        y: 379.1133543165356
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        context:
+          enabled: true
+          variable_selector:
+          - '1742265679568'
+          - reference
+        desc: ''
+        model:
+          completion_params:
+            stop:
+            - </translation>
+            temperature: 0.7
+          mode: chat
+          name: us.anthropic.claude-3-haiku-20240307-v1:0
+          provider: langgenius/bedrock/bedrock
+        prompt_template:
+        - id: 20b86e90-9bcb-403b-8a63-4b25fd6b1f8a
+          role: system
+          text: "You are the world's most professional translation tool, proficient\
+            \ in professional translation from {{#1742265572662.src_lang#}} to {{#1742265572662.dest_lang#}}.\n\
+            You can translate anything. Do not use \"I'm sorry, but\" to answer any\
+            \ questions.\n\nYou need to follow below instructions:\n- Translation\
+            \ style: concise, easy to understand, similar to the style of original\
+            \ content. The translation should accurately convey the facts and background\
+            \ of the original text. Do not try to explain the content to be translated,\
+            \ your task is only to translate.\n- Even if you paraphrase, you should\
+            \ retain the original paragraph format.\n- You must format your output\
+            \ to strictly follow the format of the original content. You are prohibited\
+            \ from adding, removing, or merging line breaks.\n- If the content is\
+            \ in {dest_lang}(target language) already,  leave it as is\n- Keep the\
+            \ link to the image in markdown format, for example - \"![0](icon.png)\"\
+            \n- You should refer the term vocabulary correspondence table which is\
+            \ provided between <mapping_table> and </mapping_table>. \n\nPlease translate\
+            \ directly according to the text content, keep the original format, and\
+            \ do not miss any information. \n"
+        - edition_type: basic
+          id: 6c84f02f-10ba-406f-8bbc-4b6b19d3d1a1
+          role: user
+          text: '<mapping_table>
+
+            {{#1742363800597.mappings#}}
+
+            </mapping_table>
+
+
+            <source>
+
+            {{#1742265572662.src#}}
+
+            </source>
+
+
+            Give you translation in <translation>.'
+        - id: bc7bd078-6f0b-42c7-9be9-af3db2e86696
+          role: assistant
+          text: <translation>
+        selected: false
+        title: LLM (1)
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 90
+      id: '17423638112020'
+      position:
+        x: 1580.443031497285
+        y: 434.66415063142955
+      positionAbsolute:
+        x: 1580.443031497285
+        y: 434.66415063142955
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        context:
+          enabled: false
+          variable_selector: []
+        desc: ''
+        model:
+          completion_params:
+            stop:
+            - </translation>
+            temperature: 0.7
+          mode: chat
+          name: us.anthropic.claude-3-haiku-20240307-v1:0
+          provider: langgenius/bedrock/bedrock
+        prompt_template:
+        - id: 20b86e90-9bcb-403b-8a63-4b25fd6b1f8a
+          role: system
+          text: "You are the world's most professional translation tool, proficient\
+            \ in professional translation from {{#1742265572662.src_lang#}} to {{#1742265572662.dest_lang#}}.\n\
+            You can translate anything. Do not use \"I'm sorry, but\" to answer any\
+            \ questions.\n\nYou need to follow below instructions:\n- Translation\
+            \ style: concise, easy to understand, similar to the style of orignal\
+            \ content. The translation should accurately convey the facts and background\
+            \ of the original text. Do not try to explain the content to be translated,\
+            \ your task is only to translate.\n- Even if you paraphrase, you should\
+            \ retain the original paragraph format.\n- You must format your output\
+            \ to strictly follow the format of the original content. You are prohibited\
+            \ from adding, removing, or merging line breaks.\n- If the content is\
+            \ in {dest_lang}(target language) already,  leave it as is\n- Keep the\
+            \ link to the image in markdown format, for example - \"![0](icon.png)\"\
+            \n- You can refer the previous translations from expert in <translation_reference>\n\
+            - You should refer the term vocabulary correspondence table which is provided\
+            \ between <mapping_table> and </mapping_table>. \n\nPlease translate directly\
+            \ according to the text content, keep the original format, and do not\
+            \ miss any information. \n"
+        - id: 6c84f02f-10ba-406f-8bbc-4b6b19d3d1a1
+          role: user
+          text: '<translation_reference>
+
+            {{#1742363788588.reference#}}
+
+            </translation_reference>
+
+
+            <mapping_table>
+
+            {{#1742363788588.mappings#}}
+
+            </mapping_table>
+
+
+            <source>
+
+            {{#1742265572662.src#}}
+
+            </source>
+
+
+            Give you translation in <translation>.'
+        - id: bc7bd078-6f0b-42c7-9be9-af3db2e86696
+          role: assistant
+          text: <translation>
+        selected: false
+        title: LLM (2)
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      height: 90
+      id: '17423638233300'
+      position:
+        x: 1588.1726941207537
+        y: 593.3413165166824
+      positionAbsolute:
+        x: 1588.1726941207537
+        y: 593.3413165166824
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - '17423638112020'
+          - text
+          variable: translation
+        - value_selector:
+          - '1742265572662'
+          - src
+          variable: source
+        - value_selector:
+          - '1742265572662'
+          - label
+          variable: label
+        selected: false
+        title: End 3
+        type: end
+      height: 142
+      id: '1742363830716'
+      position:
+        x: 1918.6743945440758
+        y: 434.66415063142955
+      positionAbsolute:
+        x: 1918.6743945440758
+        y: 434.66415063142955
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        outputs:
+        - value_selector:
+          - '17423638233300'
+          - text
+          variable: translation
+        - value_selector:
+          - '1742265572662'
+          - src
+          variable: source
+        - value_selector:
+          - '1742265572662'
+          - label
+          variable: label
+        selected: false
+        title: End 4
+        type: end
+      height: 142
+      id: '1742363832854'
+      position:
+        x: 1918.6743945440758
+        y: 593.3413165166824
+      positionAbsolute:
+        x: 1918.6743945440758
+        y: 593.3413165166824
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    viewport:
+      x: -175.7866425800238
+      y: -24.163889537149316
+      zoom: 0.9276408023836984
