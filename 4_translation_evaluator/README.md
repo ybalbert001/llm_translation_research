@@ -20,7 +20,7 @@ game_base_path='${base_path}/Game/kaggle_genshin'
 
 1. 准备评估数据
    1. 处理脚本脚本: [convert_translation_to_eval_input.py](./1_basic_eval/convert_translation_to_eval_input.py)
-   2. 数据输出路径: `$game_base_path/translation_files/evaluations/inputs`
+   2. 数据输入路径: `$game_base_path/translation_files/evaluations/inputs`
 2. 构建评估工作流
    1. [translation-eval.yml](./1_basic_eval/translation-eval.yml)
 3. 批量运行评估及统计
