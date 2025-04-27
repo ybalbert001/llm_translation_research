@@ -276,7 +276,7 @@ Please analyze the translation quality, and finally give the opinion, put your o
             real_existed_records = {
                 "source" : data["source"],
                 "translation" : record["translation"],
-                "thought" : record["thought"]
+                "thought" : record["thought"],
                 "cate_id" : cate_id,
                 "scores" : scores
             }
@@ -300,11 +300,11 @@ Please analyze the translation quality, and finally give the opinion, put your o
             
             s3.put_object(
                 Bucket=bucket,
-                Key=train_obj_key,
+                Key=obj_key,
                 Body=json.dumps(records, ensure_ascii=False, indent=2).encode('utf-8')
             )
         
-            print(f"\nSummary data has been saved to s3://{bucket}/{train_obj_key} and s3://{bucket}/{test_obj_key}")
+            print(f"\ndata has been saved to s3://{bucket}/{obj_key}")
     else:
         print(f"Only S3 path accepted..")
 
