@@ -33,14 +33,9 @@ def process_file(input_file, terms_dict):
                             continue
                         
                         accuracy_scores = term['accuracy_scores']
-                        all_scores_valid = True
-                        for lang, score in accuracy_scores.items():
-                            if score < Threshold:
-                                all_scores_valid = False
-                                break
-                        
-                        if not all_scores_valid:
-                            continue
+                        max_score_all_lang = max([ score for lang, score in accuracy_scores.items()])
+                        if max_score_all_lang < Threshold:
+                            break
                         
                         if 'terms' in term:
                             # Create a unique key for the term

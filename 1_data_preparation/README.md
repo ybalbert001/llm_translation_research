@@ -49,7 +49,11 @@ s3://{bucket}/amazon-review-product-meta-data/batch-inference
     aws s3 cp  ../dataset/translation2019zh/translation2019zh_valid.json s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference/kaggle/mixed/
     ```
 
+**1.3 准备游戏专词数据**
 
+```
+wget https://dataset.genshin-dictionary.com/words.json
+```
 
 ### 2. 通过batch_inference准备电商翻译数据
 
