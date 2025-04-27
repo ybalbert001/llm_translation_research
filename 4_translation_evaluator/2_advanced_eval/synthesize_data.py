@@ -1,0 +1,192 @@
+#!/usr/bin/env python3
+"""
+Script to synthesize data for translation evaluation training.
+This script traverses all files in the specified S3 bucket path and
+performs data synthesis for files with fewer than 100 data points.
+"""
+
+import argparse
+import json
+import os
+import random
+import math
+import boto3
+import logging
+from tqdm import tqdm
+from concurrent.futures import ThreadPoolExecutor
+import tempfile
+from dify_helper import DifyHelper
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+SYNTHETIC_WORKFLOW_URL='http://dify-alb-1-281306538.us-west-2.elb.amazonaws.com/v1/workflows/run'
+SYNTHETIC_WORKFLOW_KEY='app-xoGoDQGrRY3O4CT4MfsqEip3'
+
+def parse_args():
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(description='Synthesize data for translation evaluation training')
+    parser.add_argument(
+        '--input_dir',
+        type=str,
+        default='s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v1/dataset/',
+        help='S3 directory containing the dataset files'
+    )
+    parser.add_argument(
+        '--target_count',
+        type=int,
+        default=5,
+        help='Minimum number of samples required per file'
+    )
+    parser.add_argument(
+        '--max_workers',
+        type=int,
+        default=1,
+        help='Maximum number of worker threads'
+    )
+    return parser.parse_args()
+
+def list_s3_files(bucket, prefix):
+    """List all files in an S3 bucket with the given prefix."""
+    s3_client = boto3.client('s3')
+    paginator = s3_client.get_paginator('list_objects_v2')
+    
+    file_list = []
+    for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
+        if 'Contents' in page:
+            for obj in page['Contents']:
+                if not obj['Key'].endswith('/'):  # Skip directories
+                    file_list.append(obj['Key'])
+    
+    return file_list
+
+def download_s3_file(bucket, key, local_path):
+    """Download a file from S3 to a local path."""
+    s3_client = boto3.client('s3')
+    s3_client.download_file(bucket, key, local_path)
+
+def upload_s3_file(local_path, bucket, key):
+    """Upload a local file to S3."""
+    s3_client = boto3.client('s3')
+    s3_client.upload_file(local_path, bucket, key)
+
+def synthesize_data(dify_helper, examples, target_count):
+    """
+    Synthesize additional data with dify worlflow.
+    """
+    record = {
+        "target_cnt": target_count,
+        "examples" : json.dumps(examples,ensure_ascii=False)
+    }
+
+    output = dify_helper.invoke_workflow(record)
+    if output and 'records' in output:
+        return json.loads(output['records'])
+    else:
+        print(f"output of invoke_workflow is {output}")
+        return []
+
+def process_file(file_info):
+    """Process a single file, synthesizing data if needed."""
+    bucket = file_info['bucket']
+    key = file_info['key']
+    target_count = file_info['target_count']
+
+    parts = os.path.basename(key).split('-')
+    parts[-1] = f"{target_count}.json"
+    synthetic_filename = "-".join(parts)
+    prefix = '/'.join(key.split('/')[:-2])
+    synthetic_file_key = f"{prefix}/synethic_dataset/{synthetic_filename}"
+    
+    # Create a temporary file
+    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        local_path = temp_file.name
+    
+    dify_helper = DifyHelper(SYNTHETIC_WORKFLOW_URL, SYNTHETIC_WORKFLOW_KEY) 
+    try:
+        # Download the file
+        download_s3_file(bucket, key, local_path)
+        
+        # Read the data
+        with open(local_path, 'r', encoding='utf-8') as f:
+            try:
+                data = json.load(f)
+            except json.JSONDecodeError:
+                # Try reading as JSONL
+                f.seek(0)
+                data = [ json.loads(line) for line in f if line.strip() ]
+        
+        # Check if we need to synthesize data
+        if isinstance(data, list) and len(data) < target_count:
+            logger.info(f"File {key} has {len(data)} samples, synthesizing to {target_count}")
+            
+            # Synthesize data
+            min_batch_size = 10 
+            batch_cnt = math.ceil(target_count / min_batch_size)
+            all_records = []
+            for idx in range(batch_cnt):
+                records = synthesize_data(dify_helper, data, target_count)
+                all_records.extend(records)
+            
+            # Write the synthesized data back
+            with open(local_path, 'w', encoding='utf-8') as f:
+                json.dump(all_records, f, ensure_ascii=False, indent=2)
+            
+            # Upload the file back to S3
+            upload_s3_file(local_path, bucket, synthetic_file_key)
+            
+            logger.info(f"upload {local_path} to s3://{bucket}/{synthetic_file_key} successfully")
+    
+    finally:
+        # Clean up the temporary file
+        if os.path.exists(local_path):
+            os.unlink(local_path)
+
+def main():
+    """Main function to run the data synthesis process."""
+    args = parse_args()
+    
+    # Parse S3 URI
+    if args.input_dir.startswith('s3://'):
+        parts = args.input_dir[5:].split('/', 1)
+        bucket = parts[0]
+        prefix = parts[1] if len(parts) > 1 else ''
+    else:
+        logger.error("Input directory must be an S3 URI")
+        return
+    
+    # List all files in the S3 bucket
+    logger.info(f"Listing files in {args.input_dir}")
+    files = list_s3_files(bucket, prefix)
+    logger.info(f"Found {len(files)} files")
+    
+    # Prepare file info for processing
+    file_infos = [
+        {
+            'bucket': bucket,
+            'key': key,
+            'target_count': args.target_count
+        }
+        for key in files
+    ]
+    
+    # Process files in parallel
+    results = []
+    with ThreadPoolExecutor(max_workers=args.max_workers) as executor:
+        for result in tqdm(executor.map(process_file, file_infos), total=len(file_infos)):
+            results.append(result)
+    
+    # Log summary
+    synthesized_count = sum(1 for r in results if r['status'] == 'synthesized')
+    logger.info(f"Processed {len(results)} files, synthesized {synthesized_count} files")
+    
+    # Write detailed results to a file
+    with open('synthesis_results.json', 'w') as f:
+        json.dump(results, f, indent=2)
+
+if __name__ == "__main__":
+    main()
