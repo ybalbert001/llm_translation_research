@@ -23,4 +23,5 @@ class DifyHelper:
             return result["data"].get("outputs", {})
 
         except Exception as e:
+            print(f"result: {result}")
             print(f"exception: {e}")

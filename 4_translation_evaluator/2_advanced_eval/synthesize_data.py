@@ -78,9 +78,11 @@ def synthesize_data(dify_helper, examples, target_count):
     """
     Synthesize additional data with dify worlflow.
     """
+    sampled_examples = random.sample(examples, 2)
+
     record = {
         "target_cnt": target_count,
-        "examples" : json.dumps(examples,ensure_ascii=False)
+        "examples" : json.dumps(sampled_examples, ensure_ascii=False)
     }
 
     output = dify_helper.invoke_workflow(record)
@@ -129,7 +131,7 @@ def process_file(file_info):
             batch_cnt = math.ceil(target_count / min_batch_size)
             all_records = []
             for idx in range(batch_cnt):
-                records = synthesize_data(dify_helper, data, target_count)
+                records = synthesize_data(dify_helper, data, min_batch_size)
                 all_records.extend(records)
             
             # Write the synthesized data back

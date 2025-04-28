@@ -13,25 +13,30 @@
 ### 1.1 数据版本 - v1 
 > claude3.5作为llm-as-a-judge， 针对NovaLite与Claude3.5-v2生成翻译质量评估作为训练数据的原料
 
+- 数据预处理
 ```
 nohup python3 process_dataset.py --input s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/translation_eval_cot/c35-v2/*/*/*.jsonl.out --output_dir s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v1/dataset/ &
 
-nohup python3 generate_dataset_model_6_6.py --input s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/translation_eval_cot/c35-v2/*/*/*.jsonl.out --output_dir s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v1/model-rule-6-6/dataset/ &
 ```
 
+- 数据合成
+```
+# 遍历S3目录中的所有文件，对于数据量不满足100条的进行数据合成
+python3 synthesize_data.py --input_dir s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v1/dataset/ --min_samples 100 --max_workers 10
+```
 
 ### 1.2 数据版本 - v2
 > claude3.7作为llm-as-a-judge， 针对NovaLite与Claude3.5-v2生成翻译质量评估作为训练数据的原料
 
 
 ```
-1. 针对llm-as-a-judge的数据，生成训练数据
-
-> 云上ec2上运行更加快速。本地运行存在大量的数据读写
-
-nohup python3 generate_dataset.py --input s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/translation_eval_cot/c35-v2/*/*/*.jsonl.out --output_dir s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/dataset/ &
-
-分别输出训练数据和测试数据到trainset/和testset/目录中
-
-2. balance 训练数据
+# 1. 针对llm-as-a-judge的数据，生成训练数据
+# 
+# > 云上ec2上运行更加快速。本地运行存在大量的数据读写
+# 
+# nohup python3 generate_dataset.py --input s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/# translation_eval_cot/c35-v2/*/*/*.jsonl.out --output_dir s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/dataset/ &
+# 
+# 分别输出训练数据和测试数据到trainset/和testset/目录中
+# 
+# 2. balance 训练数据
 ```
