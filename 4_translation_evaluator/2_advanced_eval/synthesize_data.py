@@ -11,6 +11,7 @@ import os
 import random
 import math
 import boto3
+from botocore.exceptions import ClientError
 import logging
 import time
 from tqdm import tqdm
