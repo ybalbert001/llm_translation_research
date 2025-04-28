@@ -131,6 +131,7 @@ def process_file(file_info):
             batch_cnt = math.ceil(target_count / min_batch_size)
             all_records = []
             for idx in range(batch_cnt):
+                logger.info(f"synthesizing {idx}-th batch of {key}...")
                 records = synthesize_data(dify_helper, data, min_batch_size)
                 all_records.extend(records)
             
