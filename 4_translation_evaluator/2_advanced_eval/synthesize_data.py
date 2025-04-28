@@ -65,6 +65,26 @@ def list_s3_files(bucket, prefix):
     
     return file_list
 
+def check_file_exists(bucket_name, file_key):
+    """
+    检查 S3 中的文件是否存在
+    
+    :param bucket_name: S3 桶名称
+    :param file_key: 文件的键（路径和文件名）
+    :return: 如果文件存在返回 True，否则返回 False
+    """
+    s3_client = boto3.client('s3')
+    try:
+        s3_client.head_object(Bucket=bucket_name, Key=file_key)
+        return True
+    except ClientError as e:
+        if e.response['Error']['Code'] == '404':
+            # 文件不存在
+            return False
+        else:
+            # 发生其他错误
+            raise
+
 def download_s3_file(bucket, key, local_path):
     """Download a file from S3 to a local path."""
     s3_client = boto3.client('s3')
@@ -154,10 +174,15 @@ def process_file(file_info):
         # Check if we need to synthesize data
         if isinstance(data, list) and len(data) < target_count:
             logger.info(f"File {key} has {len(data)} samples, synthesizing to {target_count}")
-            
+            record_count_needed = target_count - len(data)
+            synthetic_file_key = get_synthetic_filename(key, record_count_needed)
+            if check_file_exists(bucket, synthetic_file_key) == True:
+                logger.info(f"s3://{bucket}/{synthetic_file_key} is already existed.")
+                return
+
             # Synthesize data
             min_batch_size = 10 
-            batch_cnt = math.ceil((target_count - len(data)) / min_batch_size)
+            batch_cnt = math.ceil(more_record_needed / min_batch_size)
             all_records = []
             for idx in range(batch_cnt):
                 logger.info(f"synthesizing {idx}-th batch of {key}...")
