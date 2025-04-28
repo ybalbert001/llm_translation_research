@@ -12,6 +12,7 @@ import random
 import math
 import boto3
 import logging
+import time
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor
 import tempfile
@@ -74,9 +75,19 @@ def upload_s3_file(local_path, bucket, key):
     s3_client = boto3.client('s3')
     s3_client.upload_file(local_path, bucket, key)
 
-def synthesize_data(dify_helper, examples, target_count):
+def synthesize_data(dify_helper, examples, target_count, max_retries=3, base_delay=1):
     """
     Synthesize additional data with dify worlflow.
+
+    Args:
+        dify_helper: Helper object for invoking the workflow
+        examples: List of examples to sample from
+        target_count: Target count of data to synthesize
+        max_retries: Maximum number of retry attempts (default: 3)
+        base_delay: Base delay for exponential backoff in seconds (default: 1)
+
+    Returns:
+        List of synthesized data records or empty list if all attempts fail
     """
     sampled_examples = random.sample(examples, 2)
 
@@ -85,13 +96,28 @@ def synthesize_data(dify_helper, examples, target_count):
         "examples" : json.dumps(sampled_examples, ensure_ascii=False)
     }
 
-    try:
-        output = dify_helper.invoke_workflow(record)
-        if output and 'records' in output:
-            return json.loads(output['records'])
-    except Exception as e:
-        print(f"output of invoke_workflow is {output}")
-        return []
+    retry_count = 0
+    output = None
+
+    while retry_count <= max_retries:
+        try:
+            output = dify_helper.invoke_workflow(record)
+            if output and 'records' in output:
+                return json.loads(output['records'])
+            else:
+                print(f"Attempt {retry_count + 1}/{max_retries + 1}: Invalid output format")
+        except Exception as e:
+            print(f"Attempt {retry_count + 1}/{max_retries + 1}: Error occurred - {str(e)}")
+
+        # If we've reached max retries, break out of the loop
+        if retry_count >= max_retries:
+            break
+
+        # Calculate delay with exponential backoff and jitter
+        delay = base_delay * (2 ** retry_count) + random.uniform(0, 0.5)
+        print(f"Retrying in {delay:.2f} seconds...")
+        time.sleep(delay)
+        retry_count += 1
 
 def process_file(file_info):
     """Process a single file, synthesizing data if needed."""
