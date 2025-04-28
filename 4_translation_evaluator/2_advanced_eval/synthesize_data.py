@@ -89,7 +89,7 @@ def synthesize_data(dify_helper, examples, target_count, max_retries=3, base_del
     Returns:
         List of synthesized data records or empty list if all attempts fail
     """
-    sampled_examples = random.sample(examples, 2)
+    sampled_examples = random.sample(examples, 1)
 
     record = {
         "target_cnt": target_count,
