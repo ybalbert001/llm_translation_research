@@ -85,10 +85,11 @@ def synthesize_data(dify_helper, examples, target_count):
         "examples" : json.dumps(sampled_examples, ensure_ascii=False)
     }
 
-    output = dify_helper.invoke_workflow(record)
-    if output and 'records' in output:
-        return json.loads(output['records'])
-    else:
+    try:
+        output = dify_helper.invoke_workflow(record)
+        if output and 'records' in output:
+            return json.loads(output['records'])
+    except Exception as e:
         print(f"output of invoke_workflow is {output}")
         return []
 
