@@ -98,11 +98,13 @@ def process_file(file_info):
     key = file_info['key']
     target_count = file_info['target_count']
 
-    parts = os.path.basename(key).split('-')
-    parts[-1] = f"{target_count}.json"
-    synthetic_filename = "-".join(parts)
-    prefix = '/'.join(key.split('/')[:-2])
-    synthetic_file_key = f"{prefix}/synethic_dataset/{synthetic_filename}"
+    def get_synthetic_filename(key, record_cnt):
+        parts = os.path.basename(key).split('-')
+        parts[-1] = f"{record_cnt}.json"
+        synthetic_filename = "-".join(parts)
+        prefix = '/'.join(key.split('/')[:-2])
+        synthetic_file_key = f"{prefix}/synethic_dataset/{synthetic_filename}"
+        return synthetic_file_key
     
     # Create a temporary file
     with tempfile.NamedTemporaryFile(delete=False) as temp_file:
@@ -140,6 +142,7 @@ def process_file(file_info):
                 json.dump(all_records, f, ensure_ascii=False, indent=2)
             
             # Upload the file back to S3
+            synthetic_file_key = get_synthetic_filename(key, len(all_records))
             upload_s3_file(local_path, bucket, synthetic_file_key)
             
             logger.info(f"upload {local_path} to s3://{bucket}/{synthetic_file_key} successfully")
