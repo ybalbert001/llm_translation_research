@@ -104,7 +104,7 @@ def synthesize_data(dify_helper, examples, target_count, max_retries=3, base_del
             output = dify_helper.invoke_workflow(record)
             if output and 'records' in output:
                 return json.loads(output['records'])
-            else:
+            # else:
                 print(f"Attempt {retry_count + 1}/{max_retries + 1}: Invalid output format")
         except Exception as e:
             print(f"Attempt {retry_count + 1}/{max_retries + 1}: Error occurred - {str(e)}")
@@ -162,7 +162,8 @@ def process_file(file_info):
             for idx in range(batch_cnt):
                 logger.info(f"synthesizing {idx}-th batch of {key}...")
                 records = synthesize_data(dify_helper, data, min_batch_size)
-                all_records.extend(records)
+                if records and len(records) > 1:
+                    all_records.extend(records)
             
             # Write the synthesized data back
             with open(local_path, 'w', encoding='utf-8') as f:
