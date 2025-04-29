@@ -151,7 +151,7 @@ def process_file(file_info):
         parts[-1] = f"{record_cnt}.json"
         synthetic_filename = "-".join(parts)
         prefix = '/'.join(key.split('/')[:-2])
-        synthetic_file_key = f"{prefix}/synethic_dataset/{synthetic_filename}"
+        synthetic_file_key = f"{prefix}/synethic/{synthetic_filename}"
         return synthetic_file_key
     
     # Create a temporary file
@@ -182,7 +182,7 @@ def process_file(file_info):
                 return
 
             # Synthesize data
-            min_batch_size = 10 
+            min_batch_size = 5
             batch_cnt = math.ceil(record_count_needed / min_batch_size)
             all_records = []
             for idx in range(batch_cnt):
