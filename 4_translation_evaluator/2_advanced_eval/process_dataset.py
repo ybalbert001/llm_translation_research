@@ -239,7 +239,7 @@ def main():
 Please analyze the translation quality, and finally give the opinion, put your opinion in <opinion> xml tag."""
     assistant_prompt_tempalte = """<think>{thought}</think>, So here are my ratings for each criterion: {scores}"""
 
-    dataset = {}
+    dataset = {"simple_model": {}, "complex_model": {}}
     for data in all_data:
         record_id = data["record_id"]
         record_category = '_'.join(record_id.split('_')[1:-2])
@@ -277,14 +277,19 @@ Please analyze the translation quality, and finally give the opinion, put your o
                 "source" : data["source"],
                 "translation" : record["translation"],
                 "thought" : record["thought"],
-                "cate_id" : cate_id,
                 "scores" : scores
             }
 
             key = "{}-cate-{}-score-{}".format(record_category, cate_id, min_score)
-            if key not in dataset:
-                dataset[key] = []
-            dataset[key].append(real_existed_records)
+
+            if cate_id in [0,1,2,3,4,5]:
+                if key not in dataset["simple_model"]:
+                    dataset["simple_model"][key] = []
+                dataset["simple_model"][key].append(real_existed_records)
+            elif cate_id in [6]:
+                if key not in dataset["complex_model"]:
+                    dataset["complex_model"][key] = []
+                dataset["complex_model"][key].append(real_existed_records)
             
     # Save simplified JSON output
     output_dir = args.output_dir
@@ -292,11 +297,21 @@ Please analyze the translation quality, and finally give the opinion, put your o
         s3 = boto3.client('s3')
         bucket = output_dir.split('/')[2]
         prefix = '/'.join(output_dir.split('/')[3:])
-        train_data_all = []
-        
-        for filename, records in dataset.items():
+
+        for filename, records in dataset["simple_model"].items():
             records_cnt = len(records)
-            obj_key = f"{prefix}{filename}-{records_cnt}.json"
+            obj_key = f"{prefix}/simple_model/origin/{filename}-{records_cnt}.json"
+            s3.put_object(
+                Bucket=bucket,
+                Key=obj_key,
+                Body=json.dumps(records, ensure_ascii=False, indent=2).encode('utf-8')
+            )
+
+            print(f"\ndata has been saved to s3://{bucket}/{obj_key}")
+        
+        for filename, records in dataset["complex_model"].items():
+            records_cnt = len(records)
+            obj_key = f"{prefix}/complex_model/origin/{filename}-{records_cnt}.json"
             
             s3.put_object(
                 Bucket=bucket,

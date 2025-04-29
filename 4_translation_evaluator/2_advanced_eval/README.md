@@ -15,7 +15,7 @@
 
 - 数据预处理
 ```
-nohup python3 process_dataset.py --input s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/translation_eval_cot/c35-v2/*/*/*.jsonl.out --output_dir s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v1/dataset/ &
+nohup python3 process_dataset.py --input s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/batch-inference-output/translation_eval_cot/c35-v2/*/*/*.jsonl.out --output_dir s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v1 &
 
 ```
 
@@ -23,6 +23,13 @@ nohup python3 process_dataset.py --input s3://translation-quality-check-model-sf
 ```
 # 遍历S3目录中的所有文件，对于数据量不满足100条的进行数据合成
 python3 synthesize_data.py --input_dir s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v1/dataset/ --min_samples 100 --max_workers 10
+```
+
+- 拆分训练集/测试集
+```python
+python3 gen_train_test_set.py --origin_dataset s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v1/model_a/origin/ --synthetic_dataset s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v1/model_a/synethic/ --output_train s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v1/model_a/trainset/ --output_test s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v1/model_a/testset/ --test_ratio 0.1
+
+python3 gen_train_test_set.py --origin_dataset s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v1/model_b/origin/ --synthetic_dataset s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v1/model_b/synethic/ --output_train s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v1/model_b/trainset/ --output_test s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v1/model_b/testset/ --test_ratio 0.1
 ```
 
 ### 1.2 数据版本 - v2
