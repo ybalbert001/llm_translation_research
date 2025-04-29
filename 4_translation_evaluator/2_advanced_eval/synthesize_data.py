@@ -239,14 +239,6 @@ def main():
     with ThreadPoolExecutor(max_workers=args.max_workers) as executor:
         for result in tqdm(executor.map(process_file, file_infos), total=len(file_infos)):
             results.append(result)
-    
-    # Log summary
-    synthesized_count = sum(1 for r in results if r['status'] == 'synthesized')
-    logger.info(f"Processed {len(results)} files, synthesized {synthesized_count} files")
-    
-    # Write detailed results to a file
-    with open('synthesis_results.json', 'w') as f:
-        json.dump(results, f, indent=2)
 
 if __name__ == "__main__":
     main()
