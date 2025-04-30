@@ -8,6 +8,8 @@ from botocore.config import Config
 from collections import defaultdict
 import xml.etree.ElementTree as ET
 
+from utils import get_score_category
+
 def extract_source_and_translations(json_str):
     """Extract source text and translations from the input."""
     try:
@@ -180,17 +182,6 @@ def process_file(file_path):
     print(f"Success rate: {(success_count/total_lines)*100:.2f}%\n")
     
     return all_data
-
-def get_score_category(scores):
-    min_score = 5
-    cate_id = 6
-    for cur_cate_id, score in enumerate(scores):
-        if score < min_score:
-            min_score = score
-            cate_id = cur_cate_id
-    
-    return cate_id, math.floor(min_score)
-
 
 def main():
     parser = argparse.ArgumentParser(description='Process LLM evaluation results and generate statistics.')

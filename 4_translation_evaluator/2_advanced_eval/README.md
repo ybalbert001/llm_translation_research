@@ -22,7 +22,7 @@ nohup python3 process_dataset.py --input s3://translation-quality-check-model-sf
 - 数据合成
 ```
 # 遍历S3目录中的所有文件，对于数据量不满足100条的进行数据合成
-python3 synthesize_data.py --input_dir s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v1/simple_model/origin/ --min_samples 100 --max_workers 10
+python3 synthesize_data.py --input_dir s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v1/simple_model/origin/ --target_count 200 --max_workers 10
 ```
 
 - 拆分训练集/测试集
