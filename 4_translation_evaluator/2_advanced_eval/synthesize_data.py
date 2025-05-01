@@ -173,7 +173,7 @@ def process_file(file_info):
                 data = [ json.loads(line) for line in f if line.strip() ]
         
         # Check if we need to synthesize data
-        if isinstance(data, list) and len(data) < target_count:
+        if isinstance(data, list):
             logger.info(f"File {key} has {len(data)} samples, synthesizing to {target_count}")
             record_count_needed = target_count - len(data)
             synthetic_file_key = get_synthetic_filename(key, target_count)
@@ -181,10 +181,10 @@ def process_file(file_info):
                 logger.info(f"s3://{bucket}/{synthetic_file_key} is already existed.")
                 return
 
+            all_records = []
             # Synthesize data
             min_batch_size = 5
             batch_cnt = math.ceil(target_count / min_batch_size)
-            all_records = []
             for idx in range(batch_cnt):
                 logger.info(f"synthesizing {idx}-th batch of {key}...")
                 records = synthesize_data(dify_helper, data, min_batch_size)
