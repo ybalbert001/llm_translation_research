@@ -86,6 +86,39 @@ def check_file_exists(bucket_name, file_key):
             # 发生其他错误
             raise
 
+def check_file_pattern_exists(bucket_name, prefix, filename_pattern):
+    """
+    检查 S3 桶中是否存在符合指定前缀和通配符模式的文件
+    
+    :param bucket_name: S3 桶名称
+    :param prefix: 文件键的前缀
+    :param filename_pattern: 文件名的通配符模式（不包含路径）
+    :return: 如果存在符合前缀和模式的文件返回 True，否则返回 False
+    """
+    s3_client = boto3.client('s3')
+    try:
+        response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
+        
+        if 'Contents' in response:
+            # 过滤出符合通配符模式的文件
+            for obj in response['Contents']:
+                # 提取文件名部分（去掉路径）
+                key = obj['Key']
+                filename = key.split('/')[-1]
+                
+                if fnmatch.fnmatch(filename, filename_pattern):
+                    return True
+            
+            # 如果没有找到符合模式的文件
+            return False
+        else:
+            return False
+    except ClientError as e:
+        # 处理可能的错误
+        print(f"Error checking prefix: {e}")
+        return False
+
+
 def download_s3_file(bucket, key, local_path):
     """Download a file from S3 to a local path."""
     s3_client = boto3.client('s3')
@@ -153,6 +186,14 @@ def process_file(file_info):
         prefix = '/'.join(key.split('/')[:-2])
         synthetic_file_key = f"{prefix}/synethic/{synthetic_filename}"
         return synthetic_file_key
+
+    def get_synthetic_filename_pattern(key):
+        parts = os.path.basename(key).split('-')
+        parts[-1] = f"*.json"
+        synthetic_filename = "-".join(parts)
+        prefix = '/'.join(key.split('/')[:-2])
+        synthetic_file_prefix = f"{prefix}/synethic/"
+        return synthetic_file_prefix, filename_pattern      
     
     # Create a temporary file
     with tempfile.NamedTemporaryFile(delete=False) as temp_file:
@@ -176,9 +217,13 @@ def process_file(file_info):
         if isinstance(data, list):
             logger.info(f"File {key} has {len(data)} samples, synthesizing to {target_count}")
             record_count_needed = target_count - len(data)
-            synthetic_file_key = get_synthetic_filename(key, target_count)
-            if check_file_exists(bucket, synthetic_file_key) == True:
-                logger.info(f"s3://{bucket}/{synthetic_file_key} is already existed.")
+            # synthetic_file_key = get_synthetic_filename(key, target_count)
+            synthetic_file_prefix, filename_pattern = get_synthetic_filename_pattern(key)
+            # if check_file_exists(bucket, synthetic_file_key) == True:
+            #     logger.info(f"s3://{bucket}/{synthetic_file_key} is already existed.")
+            #     return
+            if check_file_pattern_exists(bucket, synthetic_file_prefix, filename_pattern):
+                logger.info(f"s3://{bucket}/{synthetic_file_prefix}{filename_pattern} is already existed.")
                 return
 
             all_records = []
