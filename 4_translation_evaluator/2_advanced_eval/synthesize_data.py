@@ -14,6 +14,7 @@ import boto3
 from botocore.exceptions import ClientError
 import logging
 import time
+import fnmatch
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor
 import tempfile
@@ -190,7 +191,7 @@ def process_file(file_info):
     def get_synthetic_filename_pattern(key):
         parts = os.path.basename(key).split('-')
         parts[-1] = f"*.json"
-        synthetic_filename = "-".join(parts)
+        filename_pattern = "-".join(parts)
         prefix = '/'.join(key.split('/')[:-2])
         synthetic_file_prefix = f"{prefix}/synethic/"
         return synthetic_file_prefix, filename_pattern      
