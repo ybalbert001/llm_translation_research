@@ -30,18 +30,25 @@ nohup python3 process_dataset.py --input s3://translation-quality-check-model-sf
 # 遍历S3目录中的所有文件，对于数据量不满足100条的进行数据合成
 cd model_data_process
 python3 synthesize_data.py --input_dir s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v1/simple_model/origin/ --target_count 200 --max_workers 10
-
+```
+> 调整了Prompt，合成v2版本的数据
+```
 python3 synthesize_data.py --input_dir s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v2/simple_model/origin/ --target_count 200 --max_workers 10
 ```
 
 - 拆分训练集/测试集
 ```python
-# 拆分数据For simple_model
+# 拆分v1数据For simple_model
 cd model_data_process
 python3 gen_simple_model_train_test_set.py --synthetic_dataset s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v1/simple_model/synethic/ --output_bucket translation-quality-check-model-sft-20241203 --output_dir amazon-review-product-meta-data/finetune_based_translation/v1/simple_model
 
 # 拆分数据For complex_model
 python3 gen_complex_model_train_test_set.py --origin_dataset s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v1/complex_model/origin/ --output_bucket translation-quality-check-model-sft-20241203 --output_dir amazon-review-product-meta-data/finetune_based_translation/v1/complex_model
+```
+
+```
+# 拆分v2数据For simple_model
+python3 gen_simple_model_train_test_set.py --synthetic_dataset s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v2/simple_model/synethic/ --output_bucket translation-quality-check-model-sft-20241203 --output_dir amazon-review-product-meta-data/finetune_based_translation/v2/simple_model
 ```
 
 # 2.模型训练

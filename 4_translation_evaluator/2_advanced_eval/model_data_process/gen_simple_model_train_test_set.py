@@ -235,49 +235,49 @@ def main():
 
     s3 = boto3.client('s3')
 
-    # for idx, cate_list in enumerate(pos_all_data):
-    #     obj_key = f"{args.output_dir}/pos_data/category-{idx}.json"
-    #     logger.info(f"pos_data will save to ${obj_key}")
+    for idx, cate_list in enumerate(pos_all_data):
+        obj_key = f"{args.output_dir}/pos_data/category-{idx}.json"
+        logger.info(f"pos_data will save to ${obj_key}")
 
-    #     s3.put_object(
-    #         Bucket=args.output_bucket,
-    #         Key=obj_key,
-    #         Body=json.dumps(cate_list, ensure_ascii=False).encode('utf-8')
-    #     )
+        s3.put_object(
+            Bucket=args.output_bucket,
+            Key=obj_key,
+            Body=json.dumps(cate_list, ensure_ascii=False).encode('utf-8')
+        )
 
-    # for idx, cate_list in enumerate(neg_all_data):
-    #     obj_key = f"{args.output_dir}/neg_data/category-{idx}.json"
-    #     logger.info(f"neg_data will save to ${obj_key}")
+    for idx, cate_list in enumerate(neg_all_data):
+        obj_key = f"{args.output_dir}/neg_data/category-{idx}.json"
+        logger.info(f"neg_data will save to ${obj_key}")
 
-    #     s3.put_object(
-    #         Bucket=args.output_bucket,
-    #         Key=obj_key,
-    #         Body=json.dumps(cate_list, ensure_ascii=False).encode('utf-8')
-    #     )
+        s3.put_object(
+            Bucket=args.output_bucket,
+            Key=obj_key,
+            Body=json.dumps(cate_list, ensure_ascii=False).encode('utf-8')
+        )
 
     trainset = [[],[],[],[],[],[]]
     testset = [[],[],[],[],[],[]]
     for idx, cate_list in enumerate(neg_all_data):
         if idx < 6:
             total_cnt = len(cate_list)
-            train_neg_cnt = int(total_cnt * args.test_ratio)
+            train_neg_cnt = int(total_cnt * (1 - args.test_ratio))
             train_neg_samples = cate_list[:train_neg_cnt]
-            testset[idx].extend(train_neg_samples)
+            trainset[idx].extend(train_neg_samples)
             train_pos_samples = pos_all_data[idx][:train_neg_cnt]
-            testset[idx].extend(train_pos_samples)
+            trainset[idx].extend(train_pos_samples)
 
-            trainset[idx].extend(cate_list[train_neg_cnt:])
-            trainset[idx].extend(pos_all_data[idx][train_neg_cnt:total_cnt])
+            testset[idx].extend(cate_list[train_neg_cnt:])
+            testset[idx].extend(pos_all_data[idx][train_neg_cnt:total_cnt])
 
-    # for idx, cate_list in enumerate(trainset):
-    #     obj_key = f"{args.output_dir}/trainset/category-{idx}.json"
-    #     logger.info(f"pos_data will save to ${obj_key}")
+    for idx, cate_list in enumerate(trainset):
+        obj_key = f"{args.output_dir}/trainset/category-{idx}.json"
+        logger.info(f"pos_data will save to ${obj_key}")
 
-    #     s3.put_object(
-    #         Bucket=args.output_bucket,
-    #         Key=obj_key,
-    #         Body=json.dumps(trainset[idx], ensure_ascii=False).encode('utf-8')
-    #     )
+        s3.put_object(
+            Bucket=args.output_bucket,
+            Key=obj_key,
+            Body=json.dumps(trainset[idx], ensure_ascii=False).encode('utf-8')
+        )
 
     build_sft_dataset(trainset=trainset, bucket=args.output_bucket, s3_prefix_dir=f"{args.output_dir}/openai_trainset")
 
