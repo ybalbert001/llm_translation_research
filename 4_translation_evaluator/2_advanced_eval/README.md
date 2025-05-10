@@ -30,6 +30,8 @@ nohup python3 process_dataset.py --input s3://translation-quality-check-model-sf
 # 遍历S3目录中的所有文件，对于数据量不满足100条的进行数据合成
 cd model_data_process
 python3 synthesize_data.py --input_dir s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v1/simple_model/origin/ --target_count 200 --max_workers 10
+
+python3 synthesize_data.py --input_dir s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v2/simple_model/origin/ --target_count 200 --max_workers 10
 ```
 
 - 拆分训练集/测试集
@@ -41,10 +43,6 @@ python3 gen_simple_model_train_test_set.py --synthetic_dataset s3://translation-
 # 拆分数据For complex_model
 python3 gen_complex_model_train_test_set.py --origin_dataset s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v1/complex_model/origin/ --output_bucket translation-quality-check-model-sft-20241203 --output_dir amazon-review-product-meta-data/finetune_based_translation/v1/complex_model
 ```
-
-### 1.2 数据版本 - v2
-> claude3.7作为llm-as-a-judge， 针对NovaLite与Claude3.5-v2生成翻译质量评估作为训练数据的原料
-
 
 # 2.模型训练
 数据路径(trainset):

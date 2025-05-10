@@ -18,6 +18,7 @@ import fnmatch
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor
 import tempfile
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from dify_helper import DifyHelper
 
 # Configure logging

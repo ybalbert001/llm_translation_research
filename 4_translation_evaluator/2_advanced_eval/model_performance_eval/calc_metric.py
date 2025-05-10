@@ -65,7 +65,7 @@ def download_and_process_file(s3_client, bucket, key, output_dir='./results'):
         # Process each record
         for record in tqdm(data, desc=f"Processing {os.path.basename(key)}"):
             try:
-                src = record.get('src', '')
+                src = record.get('source', '')
                 translation = record.get('translation', '')
                 gt_scores= record.get('scores', '')
 
@@ -98,16 +98,15 @@ def get_label_from_scores(gt_scores, pred_scores):
         return min_index, min_value
 
     cate_id, gt_score = find_min_index_and_value(gt_scores)
-    pred_cate_id, pred_score = find_min_index_and_value(pred_scores)
-    def cate_id_to_binary_class(cate_id):
-        if cate_id in [0, 1]:
+    def score_to_binary_class(score):
+        if score in [0, 1, 2]:
             return 1 #表示错误发生
         else:
             return 0
 
-    gt_label = cate_id_to_binary_class(cate_id)
-    pred_val = cate_id_to_binary_class(pred_cate_id)
+    gt_label = score_to_binary_class(gt_score)
     pred_score = pred_scores[cate_id]
+    pred_val = score_to_binary_class(pred_score)
     return gt_label, pred_val, gt_score, pred_score
 
 def calc_metric(records):
