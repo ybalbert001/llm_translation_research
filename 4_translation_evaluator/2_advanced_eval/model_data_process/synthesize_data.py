@@ -8,6 +8,7 @@ performs data synthesis for files with fewer than 100 data points.
 import argparse
 import json
 import os
+import sys
 import random
 import math
 import boto3
