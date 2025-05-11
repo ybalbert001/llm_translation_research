@@ -129,12 +129,12 @@ def build_sft_dataset(trainset, bucket, s3_prefix_dir):
 
     1. Sensitive content should not be refused to translate
     2. No non-target language word appears
-    3. No adding irrelevant words
+    3. No irrelevant or useless repetitive words.
     4. No Spelling, abnormal symbols and grammar errors detected
     5. Quantity, Quantifiers and Units are translated accurately
     6. Format maintained between source and translation. No added numbering/bullet
 
-    Please evaluate translation quality, and give your rating(0.0-5.0).
+    The target language is zh-cn, please evaluate translation quality, and give your rating(0.0-5.0).
     """
                         },
                         {
@@ -259,7 +259,7 @@ def main():
     testset = [[],[],[],[],[],[]]
     for idx, cate_list in enumerate(neg_all_data):
         if idx < 6:
-            total_cnt = len(cate_list)
+            total_cnt = len(cate_list[:200])
             train_neg_cnt = int(total_cnt * (1 - args.test_ratio))
             train_neg_samples = cate_list[:train_neg_cnt]
             trainset[idx].extend(train_neg_samples)
