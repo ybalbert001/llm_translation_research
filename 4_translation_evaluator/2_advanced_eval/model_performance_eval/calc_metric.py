@@ -7,6 +7,7 @@ from sklearn.metrics import precision_score, recall_score, mean_absolute_error, 
 import numpy as np
 from tqdm import tqdm
 import ast
+import argparse
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from dify_helper import DifyHelper
 
@@ -16,6 +17,18 @@ SYNTHETIC_WORKFLOW_KEY='app-ZS0fvVYuhqdG0l1ttWFmZFbm'
 S3_TESTSET_PATH = "s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v1/simple_model/testset/"
 
 dify_helper = DifyHelper(SYNTHETIC_WORKFLOW_URL, SYNTHETIC_WORKFLOW_KEY)
+
+def parse_args():
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(description='Synthesize data for translation evaluation training')
+    parser.add_argument(
+        '--testset_path',
+        type=str,
+        default='s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v1/simple_model/testset/',
+        help='S3 directory containing the dataset files'
+    )
+
+    return parser.parse_args()
 
 def inference_translation_quality(dify_helper, src, translation):
     # record = {
@@ -131,7 +144,9 @@ def calc_metric(records):
 def eval_all_testsets():
     """Process all testset JSON files from S3."""
     s3_client = boto3.client('s3')
-    bucket, prefix = parse_s3_path(S3_TESTSET_PATH)
+    args = parse_args()
+
+    bucket, prefix = parse_s3_path(args.testset_path)
     
     # List all JSON files
     json_files = list_json_files(s3_client, bucket, prefix)
