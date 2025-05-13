@@ -2,7 +2,6 @@ import json
 import sys
 import os
 import boto3
-import pandas as pd
 from sklearn.metrics import precision_score, recall_score, mean_absolute_error, confusion_matrix
 import numpy as np
 from tqdm import tqdm
@@ -14,7 +13,6 @@ from dify_helper import DifyHelper
 
 SYNTHETIC_WORKFLOW_URL='http://dify-alb-1-281306538.us-west-2.elb.amazonaws.com/v1/workflows/run'
 SYNTHETIC_WORKFLOW_KEY='app-ZS0fvVYuhqdG0l1ttWFmZFbm'
-S3_TESTSET_PATH = "s3://translation-quality-check-model-sft-20241203/amazon-review-product-meta-data/finetune_based_translation/v1/simple_model/testset/"
 
 dify_helper = DifyHelper(SYNTHETIC_WORKFLOW_URL, SYNTHETIC_WORKFLOW_KEY)
 
@@ -150,7 +148,7 @@ def eval_all_testsets():
     
     # List all JSON files
     json_files = list_json_files(s3_client, bucket, prefix)
-    print(f"Found {len(json_files)} JSON files in {S3_TESTSET_PATH}")
+    print(f"Found {len(json_files)} JSON files in {args.testset_path}")
     
     all_results = []
     
