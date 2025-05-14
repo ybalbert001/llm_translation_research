@@ -266,7 +266,7 @@ def main():
             train_pos_samples = pos_all_data[idx][:train_neg_cnt]
             trainset[idx].extend(train_pos_samples)
 
-            testset[idx].extend(cate_list[train_neg_cnt:])
+            testset[idx].extend(cate_list[train_neg_cnt:total_cnt])
             testset[idx].extend(pos_all_data[idx][train_neg_cnt:total_cnt])
 
     for idx, cate_list in enumerate(trainset):
