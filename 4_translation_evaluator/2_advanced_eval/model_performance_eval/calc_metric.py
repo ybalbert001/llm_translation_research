@@ -79,16 +79,20 @@ def download_and_process_file(s3_client, bucket, key, output_dir='./results'):
                 src = record.get('source', '')
                 translation = record.get('translation', '')
                 gt_scores= record.get('scores', '')
+                gt_thought= record.get('thought', '')
 
                 # Get scores using the evaluation workflow
                 result = inference_translation_quality(dify_helper, src, translation)
-                scores_string = result['text'].split('my ratings is ')[1]
+                pred_thought = result['text']
+                scores_string = pred_thought.split('my ratings is ')[1]
                 pred_scores = ast.literal_eval(scores_string)
                 
                 # Store the results
                 result = {
                     'src': src,
                     'translation': translation,
+                    'gt_thought' : gt_thought,
+                    'pred_thought' : pred_thought,
                     'gt_scores': gt_scores,
                     'pred_scores': pred_scores
                 }
@@ -125,18 +129,21 @@ def calc_metric(records):
     y_pred_list = []
     gt_scores = []
     pred_scores = []
+    wrong_records = []
     for record in records:
         gt_label, pred_val, gt_score, pred_score = get_label_from_scores(record['gt_scores'], record['pred_scores'])
         y_gt_list.append(gt_label)
         y_pred_list.append(pred_val)
         gt_scores.append(gt_score)
         pred_scores.append(pred_score)
+        if gt_label != pred_val:
+            wrong_records.append(record)
    
     pr = precision_score(y_gt_list, y_pred_list)
     re = recall_score(y_gt_list, y_pred_list) 
     cm = confusion_matrix(y_gt_list, y_pred_list)
     mae = mean_absolute_error(gt_scores, pred_scores)   
-    return pr, re, cm, mae
+    return pr, re, cm, mae, wrong_records
 
 
 def eval_all_testsets():
@@ -155,10 +162,12 @@ def eval_all_testsets():
     # Process each file
     for json_file in json_files:
         results = download_and_process_file(s3_client, bucket, json_file)
-        pr, re, cm, mae = calc_metric(results)
+        pr, re, cm, mae, wrong_records = calc_metric(results)
         print(f"Metrics for {json_file}:")
         print(f"precision: {pr}, recall: {re}, MAE: {mae}\n Confusion Matrix:\n{cm}")
         all_results.extend(results)
+        with open(f'wrong_details_{json_file}', 'w') as outf:
+            outf.write(json.dumps(wrong_records, ensure_ascii=False, indent=2))
 
     pr, re, cm, mae = calc_metric(all_results)
     print(f"Overall Metrics:")
