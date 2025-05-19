@@ -166,7 +166,8 @@ def eval_all_testsets():
         print(f"Metrics for {json_file}:")
         print(f"precision: {pr}, recall: {re}, MAE: {mae}\n Confusion Matrix:\n{cm}")
         all_results.extend(results)
-        with open(f'wrong_details_{json_file}', 'w') as outf:
+        json_name = json_file.split('/')[-1]
+        with open(f'wrong_details_{json_name}', 'w') as outf:
             outf.write(json.dumps(wrong_records, ensure_ascii=False, indent=2))
 
     pr, re, cm, mae = calc_metric(all_results)
